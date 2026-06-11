@@ -47,12 +47,28 @@
     paw: 'M4.5 12c1.38 0 2.5-1.12 2.5-2.5S5.88 7 4.5 7 2 8.12 2 9.5 3.12 12 4.5 12zm4.5-4c1.38 0 2.5-1.12 2.5-2.5S10.38 3 9 3 6.5 4.12 6.5 5.5 7.62 8 9 8zm6 0c1.38 0 2.5-1.12 2.5-2.5S16.38 3 15 3s-2.5 1.12-2.5 2.5S13.62 8 15 8zm4.5 4c1.38 0 2.5-1.12 2.5-2.5S20.88 7 19.5 7 17 8.12 17 9.5s1.12 2.5 2.5 2.5zm-2.83 2.65c-.93-1.09-1.71-2.02-2.65-3.11-.49-.57-1.12-1.14-1.87-1.39-.12-.04-.24-.07-.36-.09-.28-.04-.58-.06-.79-.06s-.51.02-.79.07c-.12.02-.24.05-.36.09-.75.25-1.38.82-1.87 1.39-.94 1.09-1.72 2.02-2.65 3.11-1.39 1.39-2.47 3.27-1.7 5.18.75 1.86 2.78 2.04 4.61 1.61.81-.19 2.16-.41 2.76-.41s1.95.22 2.76.41c1.83.43 3.86.25 4.61-1.61.77-1.91-.31-3.79-1.7-5.18z',
     art: 'M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm5.5 11c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-3-4c-.83 0-1.5-.67-1.5-1.5S13.67 6 14.5 6s1.5.67 1.5 1.5S15.33 9 14.5 9zM5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S7.33 13 6.5 13 5 12.33 5 11.5zm6-4c0 .83-.67 1.5-1.5 1.5S8 8.33 8 7.5 8.67 6 9.5 6s1.5.67 1.5 1.5z',
     beach: 'M13.127 14.56l1.43-1.43 6.44 6.443L19.57 21zm4.293-5.73l2.86-2.86c-3.95-3.95-10.35-3.96-14.3-.02 3.93-1.3 8.31-.25 11.44 2.88zM5.95 5.98c-3.94 3.95-3.93 10.35.02 14.3l2.86-2.86C5.7 14.29 4.65 9.91 5.95 5.98zm.02-.02-.01.01c-.38 3.01 1.17 6.88 4.3 10.02l5.73-5.73c-3.13-3.13-7-4.68-10.02-4.3z',
-    sunset: 'M12 7a5 5 0 0 0-5 5h10a5 5 0 0 0-5-5zM2 13h20v2H2zM11 2.5h2V6h-2zM4.2 5.6l1.4-1.4 2.1 2.1-1.4 1.4zM18.4 4.2l1.4 1.4-2.1 2.1-1.4-1.4z'
+    sunset: 'M12 7a5 5 0 0 0-5 5h10a5 5 0 0 0-5-5zM2 13h20v2H2zM11 2.5h2V6h-2zM4.2 5.6l1.4-1.4 2.1 2.1-1.4 1.4zM18.4 4.2l1.4 1.4-2.1 2.1-1.4-1.4z',
+    train: 'M12 2c-4.42 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z'
   };
   function icon(name) {
     var d = ICONS[name];
     if (!d) return '';
     return '<span class="rb-stop__ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="' + d + '"/></svg></span>';
+  }
+
+  /* ---------------- Google Maps links ---------------- */
+  var POI = {};
+  R.pois.forEach(function (p) { POI[p.id] = p; });
+  function gmapsUrl(q) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  }
+  function gmapsForPoi(p) {
+    /* generic transit spots resolve better by coordinates; named venues by name */
+    var q = (p.type === 'transit') ? (p.lat + ',' + p.lng) : (p.name + ', Rabat');
+    return gmapsUrl(q);
+  }
+  function gLink(href, cls) {
+    return '<a class="' + cls + '" href="' + href + '" target="_blank" rel="noopener">Google ↗</a>';
   }
 
   /* ---------------- render: itinerary ---------------- */
@@ -63,11 +79,14 @@
     art.style.setProperty('--day-c', day.color);
     art.setAttribute('data-num', '0' + day.n);
     var stopsHtml = day.stops.map(function (s) {
-      var mappable = s.poi || s.anchor;
+      var btns = '';
+      if (s.poi) btns += '<button class="rb-stop__map" data-poi="' + s.poi + '">⌖ map</button>';
+      var g = s.gq ? gmapsUrl(s.gq) : (s.poi && POI[s.poi] ? gmapsForPoi(POI[s.poi]) : null);
+      if (g) btns += gLink(g, 'rb-stop__map rb-stop__map--g');
       return '<li class="rb-stop">' +
         '<span class="rb-stop__t">' + s.t + '</span>' +
         '<span class="rb-stop__name">' + icon(s.ic) + s.label + '</span>' +
-        (mappable && s.poi ? '<button class="rb-stop__map" data-poi="' + s.poi + '">⌖ map</button>' : '<span></span>') +
+        '<span class="rb-stop__btns">' + btns + '</span>' +
         '<span class="rb-stop__note">' + s.note + '</span>' +
         '</li>';
     }).join('');
@@ -118,6 +137,7 @@
           (f.bar === 'near' ? '<span class="rb-row__flag rb-row__flag--near">just under</span>' : '') +
           (f.bar === 'icon' ? '<span class="rb-row__flag rb-row__flag--icon">vibes pick</span>' : '') +
           '<button class="rb-row__map" data-poi="' + f.id + '">⌖ map</button>' +
+          gLink(gmapsForPoi(f), 'rb-row__map rb-row__map--g') +
         '</div>' +
         '<p class="rb-row__why">' + f.why + '</p>';
       eatList.appendChild(li);
@@ -152,6 +172,7 @@
       '<div class="rb-stay-card__actions">' +
         '<a class="rb-stay-card__book" href="' + s.book + '" target="_blank" rel="noopener">Check dates</a>' +
         '<button class="rb-stay-card__loc" data-poi="' + s.id + '">⌖ map</button>' +
+        gLink(gmapsForPoi(s), 'rb-stay-card__loc rb-stay-card__loc--g') +
       '</div>';
     stayGrid.appendChild(d);
   });

@@ -176,38 +176,40 @@ window.RABAT = {
 
   /* ---------------- the days ---------------- */
   days: [
-    { n: 1, dow: 'Friday', date: '19 June', title: 'Touch down, slow down', color: '#c8552c',
-      vibe: 'Gentle first afternoon — couscous, crafts and a kasbah sunset.',
+    { n: 1, dow: 'Friday', date: '19 June', title: 'Wheels down, Casablanca', color: '#c8552c',
+      vibe: 'Straight off the plane and onto the rails — Hassan II Mosque by four, home for tuck-in.',
+      alt: 'Casablanca is 90 km south-west — beyond this map’s edge. Follow the gold railway line.',
       stops: [
         { t: '11:20', ic: 'plane', poi: 'airport', label: 'Land at RBA', note: 'Bags + fixed-fare taxi (~150 MAD) — 20 min into town.' },
-        { t: '13:00', ic: 'bag', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Drop bags at the riad', note: 'Medina lanes — see the Stay section to pick ours.' },
-        { t: '13:30', ic: 'food', poi: 'darnaji', label: 'Friday couscous at Dar Naji', note: 'It’s couscous day across Morocco — and the flying-teapot show.' },
+        { t: '12:45', ic: 'bag', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Drop bags at the riad', note: 'Quick turnaround — see the Stay section to pick ours.' },
+        { t: '13:30', ic: 'train', poi: 'station', label: 'Train to Casablanca', note: 'ONCF from Rabat Ville every 30–60 min, ~1h to Casa Voyageurs. Grab snacks for the ride.' },
+        { t: '16:00', ic: 'landmark', gq: 'Hassan II Mosque, Casablanca', label: 'Hassan II Mosque guided tour', note: '4.8★ · ~48k reviews. Friday slots 15:00 & 16:00; 140 MAD adults, 30 MAD kids 6+. Shoulders & knees covered.' },
+        { t: '17:30', ic: 'camera', gq: 'Corniche Ain Diab, Casablanca', label: 'Corniche stroll', note: 'Ocean promenade below the 210 m minaret — run-around time.' },
+        { t: '18:30', ic: 'food', gq: "Rick's Café, Casablanca", label: 'Early dinner at Rick’s Café', note: 'Doors 18:30 — book ahead. Yes, that Rick’s. Play it again over goat cheese briouats.' },
+        { t: '20:15', ic: 'train', gq: 'Casa Voyageurs train station, Casablanca', label: 'Train home to Rabat', note: '~1h back north — everyone tucked in by 22:00.' }
+      ] },
+    { n: 2, dow: 'Saturday', date: '20 June', title: 'Two banks, blue lanes', color: '#0e7c66',
+      vibe: 'Rabat proper: monuments, a rowboat to Salé, then the Kasbah for mint tea and sunset.',
+      stops: [
+        { t: '09:00', ic: 'landmark', poi: 'hassan', label: 'Hassan Tower & Mausoleum', note: 'Mounted guards, marble, morning cool.' },
+        { t: '10:45', ic: 'boat', poi: 'rowboat', label: 'Rowboat across the Bou Regreg', note: '2.5–5 MAD each — the kids will demand a second crossing.' },
+        { t: '11:15', ic: 'shop', poi: 'sale', label: 'Salé medina & madrasa', note: 'Carved cedar, rooftop view, zero tour groups.' },
+        { t: '13:00', ic: 'food', poi: 'marina', label: 'Lunch on the marina', note: 'Seafood at Marea or a casual promenade café, then row back.' },
         { t: '15:00', ic: 'shop', poi: 'consuls', label: 'Rue des Consuls amble', note: 'Carpets, leather, babouches; the gentlest souk in Morocco.' },
         { t: '16:30', ic: 'camera', poi: 'kasbah', label: 'Kasbah des Oudaias', note: 'Blue lanes to the semaphore lookout over the river mouth.' },
         { t: '17:30', ic: 'leaf', poi: 'gardens', label: 'Andalusian Gardens', note: 'Cats, shade and bougainvillea.' },
         { t: '18:00', ic: 'tea', poi: 'maure', label: 'Mint tea at Café Maure', note: 'Ghriba biscuits, Salé across the water.' },
         { t: '20:00', ic: 'food', poi: 'rbatia', label: 'Dinner at Dar Rbatia', note: 'Booked ahead — briouats and lamb tagine in an 18th-century dar.' }
       ] },
-    { n: 2, dow: 'Saturday', date: '20 June', title: 'Two banks of one river', color: '#0e7c66',
-      vibe: 'Monuments in the morning, a rowboat to Salé, storks at golden hour.',
-      stops: [
-        { t: '09:00', ic: 'landmark', poi: 'hassan', label: 'Hassan Tower & Mausoleum', note: 'Mounted guards, marble, morning cool.' },
-        { t: '11:00', ic: 'boat', poi: 'rowboat', label: 'Rowboat across the Bou Regreg', note: '2.5–5 MAD each — the kids will demand a second crossing.' },
-        { t: '11:30', ic: 'shop', poi: 'sale', label: 'Salé medina & madrasa', note: 'Carved cedar, rooftop view, zero tour groups.' },
-        { t: '13:00', ic: 'food', poi: 'marina', label: 'Lunch on the marina', note: 'Seafood at Marea or a casual promenade café.' },
-        { t: '16:00', ic: 'camera', poi: 'chellah', label: 'Chellah at golden hour', note: 'Roman stones, Merinid walls, storks clattering overhead.' },
-        { t: '19:30', ic: 'music', poi: 'petitbeur', label: 'Dinner at Le Petit Beur', note: 'Live oud music with the couscous royale.' },
-        { t: '21:00', ic: 'bar', poi: 'dhow', label: 'Nightcap on Le Dhow', note: 'Ice cream on a boat — drinks only, as the reviews insist.' }
-      ] },
-    { n: 3, dow: 'Sunday', date: '21 June', title: 'Lions, pizza & art', color: '#2b4bd8',
-      vibe: 'Kid-paced: the zoo, the best pizza in town, then art or beach.',
-      alt: 'Option B — swap today for the Casablanca day-trip (see below).',
+    { n: 3, dow: 'Sunday', date: '21 June', title: 'Lions, pizza & storks', color: '#2b4bd8',
+      vibe: 'Kid-paced: the zoo, the best pizza in town, golden hour at Chellah.',
+      alt: 'Too hot? Swap beach hour for MMVI’s air-conditioned galleries, or live music at Le Petit Beur after dinner.',
       stops: [
         { t: '10:00', ic: 'paw', poi: 'zoo', label: 'National Zoo', note: 'Atlas lions and giraffe feeding (+50 MAD). Allow 3 hours.' },
         { t: '13:15', ic: 'food', poi: 'milena', label: 'Pizza at Da Milena', note: 'Wood-fired reward — the lasagna is famous.' },
-        { t: '15:30', ic: 'art', poi: 'mmvi', label: 'MMVI modern art', note: 'Air-conditioned culture; Villa des Arts (free) as the alternative.' },
-        { t: '17:00', ic: 'landmark', poi: 'palace', label: 'Royal Palace photo stop', note: 'Gates, guards, the huge mechouar.' },
-        { t: '18:00', ic: 'beach', poi: 'beach', label: 'Beach hour', note: 'Watch the surf schools under the Kasbah walls.' },
+        { t: '15:30', ic: 'landmark', poi: 'palace', label: 'Royal Palace photo stop', note: 'Gates, guards, the huge mechouar — en route to Chellah.' },
+        { t: '16:30', ic: 'camera', poi: 'chellah', label: 'Chellah at golden hour', note: 'Roman stones, Merinid walls, storks clattering overhead. 70 MAD.' },
+        { t: '18:30', ic: 'beach', poi: 'beach', label: 'Beach hour', note: 'Watch the surf schools under the Kasbah walls.' },
         { t: '20:00', ic: 'sunset', poi: 'marina', label: 'Promenade dinner', note: 'Mohammed VI Tower lit up across the water. Pack tonight.' }
       ] },
     { n: 4, dow: 'Monday', date: '22 June', title: 'Rooftop breakfast, wheels-up', color: '#d9a441',

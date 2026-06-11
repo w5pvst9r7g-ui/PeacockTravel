@@ -139,7 +139,7 @@ window.RabatMap = (function () {
   /* ---------- drawing ---------- */
   function drawBase() {
     /* water background */
-    el('rect', { x: -200, y: -200, width: W + 400, height: H + 400, fill: COLORS.water }, gGeo);
+    el('rect', { x: -600, y: -600, width: W + 1200, height: H + 1200, fill: COLORS.water }, gGeo);
     /* subtle bathymetry waves */
     for (var i = 0; i < 5; i++) {
       var off = 18 + i * 26;
@@ -151,13 +151,13 @@ window.RabatMap = (function () {
     var rabatLand = pts(COAST_RABAT)
       .concat(pts(JETTY_W))
       .concat(pts(RIVER_W))
-      .concat([{ x: W + 200, y: H + 200 }, { x: -200, y: H + 200 }]);
+      .concat([{ x: W + 600, y: H + 600 }, { x: -600, y: H + 600 }]);
     el('path', { d: poly(rabatLand), fill: COLORS.landRabat }, gGeo);
 
     /* Salé land: east jetty → river east bank → SE edge → E edge → NE corner → Salé coast reversed */
     var saleLand = pts(JETTY_E)
       .concat(pts(RIVER_E))
-      .concat([{ x: W + 200, y: P(34.0052, -6.73).y }, { x: W + 200, y: -200 }])
+      .concat([{ x: W + 600, y: P(34.0052, -6.73).y + 14 }, { x: W + 600, y: -600 }])
       .concat(pts(COAST_SALE).reverse());
     el('path', { d: poly(saleLand), fill: COLORS.landSale }, gGeo);
 
@@ -189,6 +189,14 @@ window.RabatMap = (function () {
     /* roads / tram */
     el('path', { d: smooth(pts(AVENUE)), fill: 'none', stroke: COLORS.line, 'stroke-width': 2.4 }, gGeo);
     el('path', { d: smooth(pts(TRAM)), fill: 'none', stroke: 'rgba(217,185,127,0.45)', 'stroke-width': 1.6, 'stroke-dasharray': '8 5' }, gGeo);
+
+    /* ONCF railway south to Casablanca (Friday's ride) */
+    var RAIL = [
+      [34.0160, -6.8367], [34.0110, -6.8430], [34.0030, -6.8490], [33.9920, -6.8570],
+      [33.9760, -6.8700], [33.9580, -6.8860], [33.9380, -6.9060], [33.9180, -6.9280]
+    ];
+    el('path', { d: smooth(pts(RAIL)), fill: 'none', stroke: 'rgba(217,164,65,0.75)', 'stroke-width': 2.2, 'stroke-dasharray': '12 6' }, gGeo);
+    label('→ Casablanca · 1 h by train', 33.9665, -6.8930, 9.5, -38);
     var b1 = P(BRIDGE[0][0], BRIDGE[0][1]), b2 = P(BRIDGE[1][0], BRIDGE[1][1]);
     el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: 'rgba(247,241,227,0.55)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gGeo);
     el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: COLORS.waterDeep, 'stroke-width': 1.6, 'stroke-linecap': 'round' }, gGeo);
@@ -319,7 +327,12 @@ window.RabatMap = (function () {
       ratingHtml +
       '<p class="mc-desc">' + poi.desc + '</p>' +
       (poi.why ? '<p class="mc-why">' + poi.why + '</p>' : '') +
-      (poi.book ? '<a class="mc-book" href="' + poi.book + '" target="_blank" rel="noopener">Check availability for our dates →</a>' : '');
+      '<div class="mc-links">' +
+        (poi.book ? '<a class="mc-book" href="' + poi.book + '" target="_blank" rel="noopener">Check availability →</a>' : '') +
+        '<a class="mc-book" href="https://www.google.com/maps/search/?api=1&query=' +
+          encodeURIComponent(poi.type === 'transit' ? poi.lat + ',' + poi.lng : poi.name + ', Rabat') +
+          '" target="_blank" rel="noopener">Google Maps ↗</a>' +
+      '</div>';
     card.hidden = false;
     /* gently centre the marker */
     var m = markers[id];
