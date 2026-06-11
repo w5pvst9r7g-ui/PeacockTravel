@@ -114,11 +114,13 @@
         '<span class="rb-stop__note">' + s.note + '</span>' +
         '</li>';
     }).join('');
+    var thumb = (window.RabatMap && window.RabatMap.thumb) ? window.RabatMap.thumb(day.n) : '';
     art.innerHTML =
       '<div class="rb-day__badge"><i>' + day.n + '</i></div>' +
       '<header class="rb-day__head">' +
-        '<span class="rb-day__dow">' + day.dow + ' · ' + day.date + '</span>' +
-        '<h3 class="rb-day__title">' + day.title + '</h3>' +
+        '<div><span class="rb-day__dow">' + day.dow + ' · ' + day.date + '</span>' +
+        '<h3 class="rb-day__title">' + day.title + '</h3></div>' +
+        (thumb ? '<button class="rb-day__thumb" data-setday="' + day.n + '" aria-label="Trace ' + day.dow + ' on the map">' + thumb + '<span>⌖ trace it</span></button>' : '') +
       '</header>' +
       '<p class="rb-day__vibe">' + day.vibe + '</p>' +
       (day.alt ? '<p class="rb-day__alt">⇄ ' + day.alt + '</p>' : '') +
@@ -294,6 +296,12 @@
 
   /* "⌖ map" buttons — fly the map to the poi */
   document.addEventListener('click', function (e) {
+    var dayBtn = e.target.closest('[data-setday]');
+    if (dayBtn) {
+      document.getElementById('map').scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+      setTimeout(function () { window.RabatMap && window.RabatMap.setDay(+dayBtn.getAttribute('data-setday')); }, prefersReduced ? 80 : 650);
+      return;
+    }
     var btn = e.target.closest('[data-poi]');
     if (!btn) return;
     var id = btn.getAttribute('data-poi');

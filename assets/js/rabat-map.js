@@ -654,8 +654,44 @@ window.RabatMap = (function () {
     window.addEventListener('resize', function () { setViewBox(vb); layoutMarkers(); });
   }
 
+  /* static mini-map SVG for a day's route (no init required) */
+  function thumbSVG(n) {
+    var day = window.RABAT.days[n - 1];
+    if (!day) return '';
+    var lookup = {};
+    window.RABAT.pois.forEach(function (p) { lookup[p.id] = p; });
+    var cs = [];
+    day.stops.forEach(function (s) {
+      if (s.poi && lookup[s.poi]) cs.push(P(lookup[s.poi].lat, lookup[s.poi].lng));
+      else if (s.anchor) cs.push(P(s.anchor.lat, s.anchor.lng));
+    });
+    if (cs.length < 2) return '';
+    var xs = cs.map(function (c) { return c.x; }), ys = cs.map(function (c) { return c.y; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var pad = Math.max(maxX - minX, maxY - minY) * 0.28 + 16;
+    var bx = minX - pad, by = minY - pad, bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
+    var ar = 4 / 3;
+    if (bw / bh < ar) { var nw = bh * ar; bx -= (nw - bw) / 2; bw = nw; }
+    else { var nh = bw / ar; by -= (nh - bh) / 2; bh = nh; }
+    var sw = bw / 110; /* hairline scaled to view */
+    var geo = '';
+    [COAST_RABAT, COAST_SALE, RIVER_W, RIVER_E].forEach(function (line) {
+      geo += '<path d="' + smooth(pts(line)) + '" fill="none" stroke="rgba(165,215,228,0.4)" stroke-width="' + sw + '"/>';
+    });
+    var route = '<path d="' + smooth(cs) + '" fill="none" stroke="' + day.color + '" stroke-width="' + (sw * 3) + '" stroke-dasharray="' + (sw * 6) + ' ' + (sw * 4) + '" stroke-linecap="round"/>';
+    var dots = cs.map(function (c, i) {
+      var r = (i === 0 || i === cs.length - 1) ? sw * 5 : sw * 3.4;
+      return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + day.color + '" stroke="#f7f1e3" stroke-width="' + (sw * 1.4) + '"/>';
+    }).join('');
+    return '<svg viewBox="' + bx.toFixed(1) + ' ' + by.toFixed(1) + ' ' + bw.toFixed(1) + ' ' + bh.toFixed(1) + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<rect x="' + (bx - bw) + '" y="' + (by - bh) + '" width="' + bw * 3 + '" height="' + bh * 3 + '" fill="#122019"/>' +
+      geo + route + dots + '</svg>';
+  }
+
   return {
     init: init,
+    thumb: thumbSVG,
     focusPoi: function (id) {
       if (!markers[id]) return;
       var m = markers[id];
