@@ -297,7 +297,16 @@
 /* ------------------------------------------------------------
    Map
    ------------------------------------------------------------ */
-.rb-map { background: var(--night); color: var(--cream); border-radius: 36px 36px 0 0; padding-bottom: clamp(70px, 9vw, 120px); }
+.rb-map { background: var(--night); color: var(--cream); padding-bottom: clamp(70px, 9vw, 120px); }
+/* crenellated kasbah-wall transition out of the cream sections */
+.rb-map::before, .rb-stay::before {
+  content: '';
+  display: block;
+  height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='40' viewBox='0 0 96 40'%3E%3Cpath fill='%23f7f1e3' d='M0 0 H96 V14 H86 V30 H72 V14 H58 V22 H46 V14 H32 V30 H18 V14 H0 Z'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+}
 .rb-map .rb-section-sub { color: rgba(247, 241, 227, 0.72); }
 .rb-map__shell { padding: 0 var(--gutter); max-width: 1380px; margin: 0 auto; }
 .rb-map__toolbar {
@@ -625,6 +634,8 @@
    Stay
    ------------------------------------------------------------ */
 .rb-stay { background: var(--night); color: var(--cream); padding-bottom: clamp(70px, 9vw, 120px); }
+.rb-stay .rb-section-head { padding-top: clamp(50px, 7vw, 90px); }
+.rb-map .rb-section-head { padding-top: clamp(50px, 7vw, 90px); }
 .rb-stay__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
