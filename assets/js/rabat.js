@@ -128,6 +128,48 @@
 
   /* ---------------- render: eat list ---------------- */
   var eatList = document.getElementById('eat-list');
+  var KID_IDS = { darnaji: 1, typotes: 1, milena: 1, huna: 1, maure: 1, dhow: 1 };
+  function eatBucket(area) {
+    if (/Medina|Kasbah|river|Bab/i.test(area)) return 'old';
+    if (/Agdal|Hay Riad|Prestigia/i.test(area)) return 'south';
+    return 'centre';
+  }
+  /* filter chips */
+  var chipsBar = document.createElement('div');
+  chipsBar.className = 'rb-eat__chips';
+  chipsBar.innerHTML =
+    '<button class="is-on" data-f="all">All tables</button>' +
+    '<button data-f="old">Old town</button>' +
+    '<button data-f="centre">Centre</button>' +
+    '<button data-f="south">Agdal &amp; south</button>' +
+    '<button data-f="kid">Kid wins</button>' +
+    '<button data-f="cheap">€ cheap eats</button>';
+  eatList.parentNode.insertBefore(chipsBar, eatList);
+  chipsBar.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    /* settle any pending scroll-reveals so filtered rows never re-appear mid-animation */
+    if (window.gsap) gsap.set('#eat-list .reveal', { clearProps: 'opacity,transform,visibility' });
+    chipsBar.querySelectorAll('button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
+    var f = b.getAttribute('data-f');
+    var rows = eatList.querySelectorAll('.rb-row');
+    rows.forEach(function (r) {
+      var show = f === 'all' ||
+        (f === 'kid' && r.hasAttribute('data-kid')) ||
+        (f === 'cheap' && r.getAttribute('data-price') === '€') ||
+        r.getAttribute('data-bucket') === f;
+      r.style.display = show ? '' : 'none';
+    });
+    /* hide group headers whose rows are all hidden */
+    eatList.querySelectorAll('.rb-eat__group').forEach(function (h) {
+      var any = false, n = h.nextElementSibling;
+      while (n && !n.classList.contains('rb-eat__group')) {
+        if (n.style.display !== 'none') any = true;
+        n = n.nextElementSibling;
+      }
+      h.style.display = any ? '' : 'none';
+    });
+  });
   var groups = [
     { key: 'clear', label: 'Clears the bar', note: '4.5★ and up' },
     { key: 'near', label: 'A whisker under', note: '4.3–4.4 — still very good' },
@@ -146,6 +188,9 @@
       n++;
       var li = document.createElement('li');
       li.className = 'rb-row reveal';
+      li.setAttribute('data-bucket', eatBucket(f.area));
+      li.setAttribute('data-price', f.price);
+      if (KID_IDS[f.id]) li.setAttribute('data-kid', '');
       var r = f.rating;
       var starsW = r.score ? (r.score / 5 * 100).toFixed(0) : 0;
       li.innerHTML =
