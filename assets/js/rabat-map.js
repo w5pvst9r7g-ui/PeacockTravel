@@ -84,7 +84,7 @@ window.RabatMap = (function () {
   /* ---------- state ---------- */
   var map, stage, card, cardBody;
   var markers = {};        /* poiId -> { m: L.Marker, type } */
-  var typeGroups = {};     /* type -> L.LayerGroup */
+  var cluster = null;      /* L.MarkerClusterGroup holding visible markers */
   var routeLayer = null;
   var numsLayer = null;
   var activeDay = 'all';
@@ -129,9 +129,15 @@ window.RabatMap = (function () {
   }
 
   function drawMarkers(pois) {
-    ['sight', 'food', 'stay', 'transit'].forEach(function (t) {
-      typeGroups[t] = L.layerGroup().addTo(map);
-    });
+    cluster = L.markerClusterGroup({
+      maxClusterRadius: 36,
+      disableClusteringAtZoom: 15,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction: function (c) {
+        return L.divIcon({ className: 'lf-cluster', html: '<span>' + c.getChildCount() + '</span>', iconSize: [32, 32] });
+      }
+    }).addTo(map);
     pois.forEach(function (poi) {
       poiById[poi.id] = poi;
       var m = L.marker([poi.lat, poi.lng], {
@@ -140,8 +146,8 @@ window.RabatMap = (function () {
       });
       m.bindTooltip(tipText(poi), { direction: 'top', offset: [0, -10], className: 'lf-tip' });
       m.on('click', function () { openCard(poi.id); });
-      m.addTo(typeGroups[poi.type]);
-      markers[poi.id] = { m: m, type: poi.type };
+      cluster.addLayer(m);
+      markers[poi.id] = { m: m, type: poi.type, shown: true };
     });
   }
 
@@ -280,20 +286,17 @@ window.RabatMap = (function () {
   }
 
   function applyLayerVisibility() {
+    var day = activeDay !== 'all' ? window.RABAT.days[activeDay - 1] : null;
     Object.keys(markers).forEach(function (id) {
       var rec = markers[id];
-      var visible = layerOn[rec.type] !== false;
-      var el = rec.m.getElement();
-      if (!el) return;
-      if (activeDay !== 'all') {
-        var day = window.RABAT.days[activeDay - 1];
+      var show = layerOn[rec.type] !== false;
+      if (day) {
+        /* a day's own stops are told by the numbered badges — hide their type pins */
         var inDay = day.stops.some(function (s) { return s.poi === id; });
-        el.style.opacity = inDay ? 1 : (visible ? 0.25 : 0);
-        el.style.pointerEvents = (inDay || visible) ? 'auto' : 'none';
-      } else {
-        el.style.opacity = visible ? 1 : 0;
-        el.style.pointerEvents = visible ? 'auto' : 'none';
+        if (inDay) show = false;
       }
+      if (show && !rec.shown) { cluster.addLayer(rec.m); rec.shown = true; }
+      if (!show && rec.shown) { cluster.removeLayer(rec.m); rec.shown = false; }
     });
   }
 
