@@ -369,8 +369,18 @@
     eatPhoto.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Moroccan_TAGINE.JPG/640px-Moroccan_TAGINE.JPG';
   }
 
-  /* ---------------- map ---------------- */
-  if (window.RabatMap) window.RabatMap.init();
+  /* ---------------- map (lazy: boots when the section approaches) ---------------- */
+  function ensureMap() { if (window.RabatMap) window.RabatMap.init(); }
+  (function () {
+    var sec = document.getElementById('map');
+    if (!sec) return;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) { ensureMap(); io.disconnect(); }
+      }, { rootMargin: '600px 0px' });
+      io.observe(sec);
+    } else ensureMap();
+  })();
 
   /* during the trip: pre-select today's route on the map */
   (function () {
@@ -379,7 +389,7 @@
     if (now < dayStart(1) || now > dayEnd(4)) return;
     for (var n = 1; n <= 4; n++) {
       if (now >= dayStart(n) && now <= dayEnd(n)) {
-        setTimeout(function () { window.RabatMap && window.RabatMap.setDay(n, false); }, 400);
+        setTimeout(function () { ensureMap(); window.RabatMap && window.RabatMap.setDay(n, false); }, 400);
         break;
       }
     }
@@ -391,6 +401,7 @@
     var mPoi = h.match(/^#poi=([\w-]+)$/);
     var mDay = h.match(/^#day=([1-4])$/);
     if (!mPoi && !mDay) return;
+    ensureMap();
     setTimeout(function () {
       document.getElementById('map').scrollIntoView({ behavior: 'auto', block: 'start' });
       if (mPoi) window.RabatMap.focusPoi(mPoi[1]);
@@ -404,12 +415,14 @@
   document.addEventListener('click', function (e) {
     var dayBtn = e.target.closest('[data-setday]');
     if (dayBtn) {
+      ensureMap();
       document.getElementById('map').scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
       setTimeout(function () { window.RabatMap && window.RabatMap.setDay(+dayBtn.getAttribute('data-setday')); }, prefersReduced ? 80 : 650);
       return;
     }
     var btn = e.target.closest('[data-poi]');
     if (!btn) return;
+    ensureMap();
     var id = btn.getAttribute('data-poi');
     document.getElementById('map').scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
     var delay = prefersReduced ? 80 : 650;

@@ -346,6 +346,7 @@ window.RabatMap = (function () {
 
   /* ---------- init ---------- */
   function init() {
+    if (map) return; /* idempotent — callers may race */
     stage = document.getElementById('map-stage');
     var canvas = document.getElementById('map-canvas');
     card = document.getElementById('map-card');
