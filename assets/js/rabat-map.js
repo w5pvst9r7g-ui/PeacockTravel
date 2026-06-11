@@ -368,11 +368,25 @@ window.RabatMap = (function () {
 
     var tileStyle = 'light_all';
     try { tileStyle = localStorage.getItem('rbMapStyle') === 'dark' ? 'dark_all' : 'light_all'; } catch (e) {}
+    /* designed fallback tile (faint zellige grid) so dead tiles look intentional */
+    function errTile(dark) {
+      var bg = dark ? '%231a2425' : '%23e7e3d8', ln = dark ? '%23243231' : '%23d8d2c2';
+      return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22256%22 height=%22256%22%3E%3Crect width=%22256%22 height=%22256%22 fill=%22' + bg + '%22/%3E%3Cpath d=%22M0 64h256M0 128h256M0 192h256M64 0v256M128 0v256M192 0v256%22 stroke=%22' + ln + '%22 stroke-width=%221%22/%3E%3C/svg%3E';
+    }
     var tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/' + tileStyle + '/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · © <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
-      maxZoom: 19
+      maxZoom: 19,
+      errorTileUrl: errTile(tileStyle === 'dark_all')
     }).addTo(map);
+    /* quiet loading hint while tiles stream in */
+    var loadPill = document.createElement('div');
+    loadPill.className = 'rb-map__loading';
+    loadPill.textContent = 'fetching map…';
+    loadPill.hidden = true;
+    stage.appendChild(loadPill);
+    tiles.on('loading', function () { loadPill.hidden = false; });
+    tiles.on('load', function () { loadPill.hidden = true; });
     stage.classList.toggle('is-night', tileStyle === 'dark_all');
 
     /* paper / night basemap toggle */
@@ -383,6 +397,7 @@ window.RabatMap = (function () {
     document.getElementById('map-layers').appendChild(styleBtn);
     styleBtn.addEventListener('click', function () {
       tileStyle = tileStyle === 'light_all' ? 'dark_all' : 'light_all';
+      tiles.options.errorTileUrl = errTile(tileStyle === 'dark_all');
       tiles.setUrl('https://{s}.basemaps.cartocdn.com/' + tileStyle + '/{z}/{x}/{y}{r}.png');
       stage.classList.toggle('is-night', tileStyle === 'dark_all');
       styleLabel();

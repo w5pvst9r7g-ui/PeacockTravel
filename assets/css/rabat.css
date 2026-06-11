@@ -1209,3 +1209,23 @@ section[id] { scroll-margin-top: 64px; }
 .rb-map__stage.is-night .leaflet-control-attribution { background: rgba(12, 21, 18, 0.8) !important; color: rgba(247, 241, 227, 0.6) !important; }
 .rb-map__stage.is-night .leaflet-control-attribution a { color: rgba(247, 241, 227, 0.8) !important; }
 .rb-map__stage.is-night .leaflet-control-scale-line { background: rgba(12, 21, 18, 0.7) !important; border-color: rgba(247, 241, 227, 0.6) !important; color: var(--cream) !important; }
+
+/* tile loading hint */
+.rb-map__loading {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(247, 241, 227, 0.85);
+  background: rgba(12, 21, 18, 0.7);
+  border: 1px solid rgba(247, 241, 227, 0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: pulse 1.6s infinite;
+}
