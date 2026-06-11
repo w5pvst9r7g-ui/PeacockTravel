@@ -261,6 +261,63 @@
     if (wKas > 32) return '🚕 ~' + Math.max(6, Math.round(kKas * 3)) + ' min by taxi → Kasbah';
     return '🚶 ' + wKas + ' min → Kasbah · ' + wHas + ' min → Hassan Tower';
   }
+  /* comparison table + view toggle */
+  (function () {
+    var head = document.querySelector('#stay .rb-section-head');
+    var stays = R.pois.filter(function (p) { return p.type === 'stay'; });
+    var wrap = document.createElement('div');
+    wrap.className = 'rb-stay__tablewrap';
+    wrap.hidden = true;
+    function num(str) { var m = String(str).match(/\d[\d,]*/); return m ? parseInt(m[0].replace(/,/g, ''), 10) : 0; }
+    function walkMin(s) { return Math.round(km(s.lat, s.lng, KASBAH[0], KASBAH[1]) * 13); }
+    var rows = stays.map(function (s) {
+      return { s: s, price: num(s.price), score: s.rating.score, walk: walkMin(s) };
+    });
+    var sortKey = 'price', sortDir = 1;
+    function render() {
+      rows.sort(function (a, b) { return (a[sortKey] - b[sortKey]) * sortDir; });
+      var arrow = sortDir === 1 ? ' ↑' : ' ↓';
+      wrap.innerHTML = '<table class="rb-stay-table"><thead><tr>' +
+        '<th>Stay</th><th>Style · area</th>' +
+        '<th class="is-sort" data-k="score">Score' + (sortKey === 'score' ? arrow : '') + '</th>' +
+        '<th class="is-sort" data-k="price">3 nights' + (sortKey === 'price' ? arrow : '') + '</th>' +
+        '<th class="is-sort" data-k="walk">Walk → Kasbah' + (sortKey === 'walk' ? arrow : '') + '</th>' +
+        '<th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          var s = r.s;
+          return '<tr' + (s.pick ? ' class="is-pick"' : '') + '>' +
+            '<td><button class="rb-stay-table__name" data-poi="' + s.id + '">' + s.name + (s.pick ? ' ★' : '') + '</button></td>' +
+            '<td>' + s.style + '<small>' + s.area + '</small></td>' +
+            '<td><b>' + s.rating.score.toFixed(1) + '</b><small>' + (s.rating.count ? s.rating.count.toLocaleString('en') + ' · ' : '') + s.rating.src + '</small></td>' +
+            '<td><b>' + s.price.split('·')[0].trim() + '</b><small>' + perNight(s.price) + '</small></td>' +
+            '<td>' + (/Salé/.test(s.area) ? '⛵ ' + r.walk + ' min' : (r.walk > 32 ? '🚕 ~' + Math.max(6, Math.round(r.walk / 13 * 3)) + ' min' : '🚶 ' + r.walk + ' min')) + '</td>' +
+            '<td><a href="' + s.book + '" target="_blank" rel="noopener">Book ↗</a></td></tr>';
+        }).join('') + '</tbody></table>';
+      wrap.querySelectorAll('.is-sort').forEach(function (th) {
+        th.addEventListener('click', function () {
+          var k = th.getAttribute('data-k');
+          if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; }
+          render();
+        });
+      });
+    }
+    render();
+    var toggle = document.createElement('div');
+    toggle.className = 'rb-stay__toggle';
+    toggle.innerHTML = '<button class="is-on" data-v="cards">⊞ Cards</button><button data-v="table">☰ Compare</button>';
+    head.appendChild(toggle);
+    toggle.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      toggle.querySelectorAll('button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
+      var table = b.getAttribute('data-v') === 'table';
+      wrap.hidden = !table;
+      stayGrid.hidden = table;
+      if (table && window.gsap) gsap.set('#stay .reveal', { clearProps: 'opacity,transform' });
+    });
+    stayGrid.parentNode.insertBefore(wrap, stayGrid.nextSibling);
+  })();
+
   R.pois.filter(function (p) { return p.type === 'stay'; }).forEach(function (s) {
     var d = document.createElement('article');
     d.className = 'rb-stay-card reveal' + (s.pick ? ' is-pick' : '');
