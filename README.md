@@ -7,12 +7,17 @@ A fully self-contained static site for planning the Peacock family's trips.
 - **`index.html`** — landing page: an interactive 3D dotted globe (Three.js) tracing the
   Dublin → Rabat flight arc, the departures board of upcoming trips, and the family crew.
 - **`rabat.html`** — the Rabat 2026 trip (Fri 19 → Mon 22 Jun, FR 162/163, booking H7M9XX):
-  - day-by-day itinerary, every stop linked to the map
-  - custom interactive SVG map of Rabat & Salé, projected from real coordinates
-    (day routes, restaurant/stay/sight layers, pan/zoom/pinch, detail cards, Morocco inset)
-  - the table list — restaurants with verified Google ratings (honest flags for icons below the 4.5★ bar)
-  - stay options with live Booking.com pricing for the trip dates and deep links
-  - neighbourhood guide, optional Casablanca day-trip, practical facts
+  - day-by-day itinerary with per-stop icons, clickable mini-map route thumbnails,
+    Google Maps links on every stop, and a live countdown chip in the hero
+  - custom interactive SVG map of Rabat & Salé, projected from real coordinates:
+    day routes with a synced stop manifest, restaurant/stay/sight layers,
+    pan/zoom/pinch, photo detail cards, ONCF railway to Casablanca, Morocco inset
+  - the table list — verified Google ratings (honest flags below the 4.5★ bar)
+    with old-town/centre/south, kid-wins and cheap-eats filters
+  - stay options with live Booking.com pricing, computed walk/taxi times to the
+    Kasbah and Hassan Tower, a front-runner pick, and booking + Google links
+  - Friday Casablanca plan (train + Hassan II Mosque tour), neighbourhood guide,
+    practical facts; licensed Wikimedia photography layered into the illustrated hero
 
 ## Running
 
