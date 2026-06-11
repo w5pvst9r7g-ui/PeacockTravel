@@ -101,6 +101,17 @@
     chips.appendChild(chip);
   })();
 
+  /* ---------------- print button ---------------- */
+  (function () {
+    var head = document.querySelector('#days .rb-section-head');
+    if (!head) return;
+    var b = document.createElement('button');
+    b.className = 'rb-print reveal';
+    b.innerHTML = '🖨 Print the plan';
+    b.addEventListener('click', function () { window.print(); });
+    head.appendChild(b);
+  })();
+
   /* ---------------- render: itinerary ---------------- */
   var rail = document.getElementById('days-rail');
   R.days.forEach(function (day) {

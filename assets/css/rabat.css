@@ -1060,3 +1060,64 @@ section[id] { scroll-margin-top: 64px; }
 .rb-day.is-today .rb-day__badge::before, .rb-day.is-today .rb-day__badge::after {
   box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--gold);
 }
+
+/* ------------------------------------------------------------
+   Print — the paper trip sheet
+   ------------------------------------------------------------ */
+.rb-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 10px 18px;
+  transition: background 0.25s, color 0.25s;
+}
+.rb-print:hover { background: var(--ink); color: var(--cream); }
+
+@media print {
+  * { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
+  body, body.rabat { background: #fff; color: #000; }
+  .nav, .rb-hero__scene, .rb-hero__scroll, .rb-hero__credit, .rb-curtain,
+  .rb-map, .rb-divider, .rb-hoods, .rb-extra__art, .rb-arch,
+  .rb-stop__btns, .rb-row__actions, .rb-stay-card__actions, .rb-eat__chips,
+  .rb-day__thumb, .rb-print, .footer { display: none !important; }
+  .rb-hero { min-height: 0; background: none; color: #000; display: block; }
+  .rb-hero__content { padding: 0 0 6mm; }
+  .rb-hero__title { font-size: 30pt; color: #000; text-shadow: none; }
+  .rb-hero__kicker, .rb-hero__arabic { color: #444; text-shadow: none; }
+  .rb-chip { border-color: #999; background: none; color: #000; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .rb-chip b, .rb-chip--live { color: #000; background: none; }
+  .rb-brief, .rb-section-head, .rb-eat__list, .rb-practical__grid { padding-top: 4mm; padding-bottom: 2mm; }
+  .rb-h2, .rb-day__title, .rb-row__name, .rb-stay-card__name { color: #000 !important; }
+  .rb-h2 em { color: #333; }
+  .rb-day { padding: 3mm 0 3mm 14mm; break-inside: avoid; }
+  .rb-day::before { display: none; }
+  .rb-day__badge { width: 10mm; height: 10mm; font-size: 12pt; filter: none; }
+  .rb-stop { border-color: #bbb; background: none; break-inside: avoid; padding: 2mm 3mm; }
+  .rb-stop__ic { display: none; }
+  .rb-days__line { display: none; }
+  .rb-eat__group { color: #000; border-color: #000; }
+  .rb-row { break-inside: avoid; }
+  .rb-row__stars i { color: #000; }
+  .rb-stay { background: none; color: #000; }
+  .rb-stay::before, .rb-map::before { display: none; }
+  .rb-stay .rb-section-sub, .rb-stay-card__desc, .rb-stay-card__area { color: #333; }
+  .rb-stay__grid { display: block; }
+  .rb-stay-card { background: none; border: 1px solid #999; color: #000; break-inside: avoid; margin-bottom: 3mm; }
+  .rb-stay-card__price, .rb-stay-card__why, .rb-stay-card__style { color: #000; border-color: #666; }
+  .rb-stay-card__dist { color: #333; background: none; padding: 0; }
+  .rb-stay-card__badge { background: none; border: 1px solid #000; color: #000; }
+  .rb-stay-card__ribbon { background: none; border: 1px solid #000; color: #000; }
+  .rb-extra__card { background: none; color: #000; border: 1px solid #999; }
+  .rb-extra__txt .kicker, .rb-extra__txt a, .rb-extra__txt b { color: #000; }
+  .rb-prac, .rb-fact { background: none; }
+  .rb-prac p, .rb-fact dd { color: #222; }
+  .rb-fact b { color: #000; }
+  section[id] { scroll-margin-top: 0; }
+}
