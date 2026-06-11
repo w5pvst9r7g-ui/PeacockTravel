@@ -320,7 +320,12 @@ window.RabatMap = (function () {
     } else if (r.src) {
       ratingHtml = '<div class="mc-rating"><span>' + r.src + '</span></div>';
     }
-    cardBody.innerHTML =
+    var photoHtml = '';
+    if (poi.img) {
+      photoHtml = '<figure class="mc-photo"><img alt="" decoding="async" referrerpolicy="no-referrer">' +
+        '<figcaption>' + poi.img.credit + ' · Wikimedia</figcaption></figure>';
+    }
+    cardBody.innerHTML = photoHtml +
       '<p class="mc-type" style="--c:' + COLORS[poi.type] + '">' + TYPE_LABEL[poi.type] + (poi.cuisine ? ' · ' + poi.cuisine : '') + (poi.style ? ' · ' + poi.style : '') + '</p>' +
       '<h3 class="mc-name">' + poi.name + '</h3>' +
       '<p class="mc-area">' + poi.area + (poi.price ? ' · ' + poi.price : '') + '</p>' +
@@ -333,6 +338,13 @@ window.RabatMap = (function () {
           encodeURIComponent(poi.type === 'transit' ? poi.lat + ',' + poi.lng : poi.name + ', Rabat') +
           '" target="_blank" rel="noopener">Google Maps ↗</a>' +
       '</div>';
+    if (poi.img) {
+      var ph = cardBody.querySelector('.mc-photo');
+      var im = ph.querySelector('img');
+      im.addEventListener('load', function () { ph.classList.add('is-loaded'); });
+      im.src = poi.img.src;
+      im.alt = poi.name;
+    }
     card.hidden = false;
     /* gently centre the marker */
     var m = markers[id];
