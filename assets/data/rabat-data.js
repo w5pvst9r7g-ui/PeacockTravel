@@ -118,7 +118,7 @@ window.RABAT = {
       why: 'Drinks-and-ice-cream stop with a knockout view. Reviews agree: don’t stay for dinner.', bar: 'icon' },
 
     /* — stays — */
-    { id: 'darshaeir', type: 'stay', name: 'Dar Shaeir', lat: 34.0279, lng: -6.8377,
+    { id: 'darshaeir', type: 'stay', name: 'Dar Shaeir', lat: 34.0279, lng: -6.8377, pick: true,
       area: 'Medina', rating: { score: 9.3, count: 889, src: 'Booking.com' }, price: '€464 · 3 nights', style: 'Riad guesthouse',
       desc: 'Garden-courtyard riad two lanes from Rue des Consuls — the score-and-volume champion of the medina.',
       why: 'Best balance of price, reviews and walk-everywhere location.',
@@ -179,43 +179,43 @@ window.RABAT = {
     { n: 1, dow: 'Friday', date: '19 June', title: 'Touch down, slow down', color: '#c8552c',
       vibe: 'Gentle first afternoon — couscous, crafts and a kasbah sunset.',
       stops: [
-        { t: '11:20', poi: 'airport', label: 'Land at RBA', note: 'Bags + fixed-fare taxi (~150 MAD) — 20 min into town.' },
-        { t: '13:00', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Drop bags at the riad', note: 'Medina lanes — see the Stay section to pick ours.' },
-        { t: '13:30', poi: 'darnaji', label: 'Friday couscous at Dar Naji', note: 'It’s couscous day across Morocco — and the flying-teapot show.' },
-        { t: '15:00', poi: 'consuls', label: 'Rue des Consuls amble', note: 'Carpets, leather, babouches; the gentlest souk in Morocco.' },
-        { t: '16:30', poi: 'kasbah', label: 'Kasbah des Oudaias', note: 'Blue lanes to the semaphore lookout over the river mouth.' },
-        { t: '17:30', poi: 'gardens', label: 'Andalusian Gardens', note: 'Cats, shade and bougainvillea.' },
-        { t: '18:00', poi: 'maure', label: 'Mint tea at Café Maure', note: 'Ghriba biscuits, Salé across the water.' },
-        { t: '20:00', poi: 'rbatia', label: 'Dinner at Dar Rbatia', note: 'Booked ahead — briouats and lamb tagine in an 18th-century dar.' }
+        { t: '11:20', ic: 'plane', poi: 'airport', label: 'Land at RBA', note: 'Bags + fixed-fare taxi (~150 MAD) — 20 min into town.' },
+        { t: '13:00', ic: 'bag', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Drop bags at the riad', note: 'Medina lanes — see the Stay section to pick ours.' },
+        { t: '13:30', ic: 'food', poi: 'darnaji', label: 'Friday couscous at Dar Naji', note: 'It’s couscous day across Morocco — and the flying-teapot show.' },
+        { t: '15:00', ic: 'shop', poi: 'consuls', label: 'Rue des Consuls amble', note: 'Carpets, leather, babouches; the gentlest souk in Morocco.' },
+        { t: '16:30', ic: 'camera', poi: 'kasbah', label: 'Kasbah des Oudaias', note: 'Blue lanes to the semaphore lookout over the river mouth.' },
+        { t: '17:30', ic: 'leaf', poi: 'gardens', label: 'Andalusian Gardens', note: 'Cats, shade and bougainvillea.' },
+        { t: '18:00', ic: 'tea', poi: 'maure', label: 'Mint tea at Café Maure', note: 'Ghriba biscuits, Salé across the water.' },
+        { t: '20:00', ic: 'food', poi: 'rbatia', label: 'Dinner at Dar Rbatia', note: 'Booked ahead — briouats and lamb tagine in an 18th-century dar.' }
       ] },
     { n: 2, dow: 'Saturday', date: '20 June', title: 'Two banks of one river', color: '#0e7c66',
       vibe: 'Monuments in the morning, a rowboat to Salé, storks at golden hour.',
       stops: [
-        { t: '09:00', poi: 'hassan', label: 'Hassan Tower & Mausoleum', note: 'Mounted guards, marble, morning cool.' },
-        { t: '11:00', poi: 'rowboat', label: 'Rowboat across the Bou Regreg', note: '2.5–5 MAD each — the kids will demand a second crossing.' },
-        { t: '11:30', poi: 'sale', label: 'Salé medina & madrasa', note: 'Carved cedar, rooftop view, zero tour groups.' },
-        { t: '13:00', poi: 'marina', label: 'Lunch on the marina', note: 'Seafood at Marea or a casual promenade café.' },
-        { t: '16:00', poi: 'chellah', label: 'Chellah at golden hour', note: 'Roman stones, Merinid walls, storks clattering overhead.' },
-        { t: '19:30', poi: 'petitbeur', label: 'Dinner at Le Petit Beur', note: 'Live oud music with the couscous royale.' },
-        { t: '21:00', poi: 'dhow', label: 'Nightcap on Le Dhow', note: 'Ice cream on a boat — drinks only, as the reviews insist.' }
+        { t: '09:00', ic: 'landmark', poi: 'hassan', label: 'Hassan Tower & Mausoleum', note: 'Mounted guards, marble, morning cool.' },
+        { t: '11:00', ic: 'boat', poi: 'rowboat', label: 'Rowboat across the Bou Regreg', note: '2.5–5 MAD each — the kids will demand a second crossing.' },
+        { t: '11:30', ic: 'shop', poi: 'sale', label: 'Salé medina & madrasa', note: 'Carved cedar, rooftop view, zero tour groups.' },
+        { t: '13:00', ic: 'food', poi: 'marina', label: 'Lunch on the marina', note: 'Seafood at Marea or a casual promenade café.' },
+        { t: '16:00', ic: 'camera', poi: 'chellah', label: 'Chellah at golden hour', note: 'Roman stones, Merinid walls, storks clattering overhead.' },
+        { t: '19:30', ic: 'music', poi: 'petitbeur', label: 'Dinner at Le Petit Beur', note: 'Live oud music with the couscous royale.' },
+        { t: '21:00', ic: 'bar', poi: 'dhow', label: 'Nightcap on Le Dhow', note: 'Ice cream on a boat — drinks only, as the reviews insist.' }
       ] },
     { n: 3, dow: 'Sunday', date: '21 June', title: 'Lions, pizza & art', color: '#2b4bd8',
       vibe: 'Kid-paced: the zoo, the best pizza in town, then art or beach.',
       alt: 'Option B — swap today for the Casablanca day-trip (see below).',
       stops: [
-        { t: '10:00', poi: 'zoo', label: 'National Zoo', note: 'Atlas lions and giraffe feeding (+50 MAD). Allow 3 hours.' },
-        { t: '13:15', poi: 'milena', label: 'Pizza at Da Milena', note: 'Wood-fired reward — the lasagna is famous.' },
-        { t: '15:30', poi: 'mmvi', label: 'MMVI modern art', note: 'Air-conditioned culture; Villa des Arts (free) as the alternative.' },
-        { t: '17:00', poi: 'palace', label: 'Royal Palace photo stop', note: 'Gates, guards, the huge mechouar.' },
-        { t: '18:00', poi: 'beach', label: 'Beach hour', note: 'Watch the surf schools under the Kasbah walls.' },
-        { t: '20:00', poi: 'marina', label: 'Promenade dinner', note: 'Mohammed VI Tower lit up across the water. Pack tonight.' }
+        { t: '10:00', ic: 'paw', poi: 'zoo', label: 'National Zoo', note: 'Atlas lions and giraffe feeding (+50 MAD). Allow 3 hours.' },
+        { t: '13:15', ic: 'food', poi: 'milena', label: 'Pizza at Da Milena', note: 'Wood-fired reward — the lasagna is famous.' },
+        { t: '15:30', ic: 'art', poi: 'mmvi', label: 'MMVI modern art', note: 'Air-conditioned culture; Villa des Arts (free) as the alternative.' },
+        { t: '17:00', ic: 'landmark', poi: 'palace', label: 'Royal Palace photo stop', note: 'Gates, guards, the huge mechouar.' },
+        { t: '18:00', ic: 'beach', poi: 'beach', label: 'Beach hour', note: 'Watch the surf schools under the Kasbah walls.' },
+        { t: '20:00', ic: 'sunset', poi: 'marina', label: 'Promenade dinner', note: 'Mohammed VI Tower lit up across the water. Pack tonight.' }
       ] },
     { n: 4, dow: 'Monday', date: '22 June', title: 'Rooftop breakfast, wheels-up', color: '#d9a441',
       vibe: 'One last mint tea on the roof, then home.',
       stops: [
-        { t: '08:00', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Breakfast on the riad roof', note: 'Msemen, amlou, one final pot of tea.' },
-        { t: '09:00', poi: 'airport', label: 'Taxi to RBA', note: '20–25 minutes; small airport, easy bag-drop.' },
-        { t: '11:40', poi: null, label: 'FR 163 to Dublin', note: 'Land 15:05 — school run salvageable.' }
+        { t: '08:00', ic: 'tea', poi: null, anchor: { lat: 34.0275, lng: -6.8378 }, label: 'Breakfast on the riad roof', note: 'Msemen, amlou, one final pot of tea.' },
+        { t: '09:00', ic: 'bag', poi: 'airport', label: 'Taxi to RBA', note: '20–25 minutes; small airport, easy bag-drop.' },
+        { t: '11:40', ic: 'plane', poi: null, label: 'FR 163 to Dublin', note: 'Land 15:05 — school run salvageable.' }
       ] }
   ],
 

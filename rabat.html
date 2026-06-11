@@ -71,6 +71,10 @@
             <path d="M890 760 h40" stroke-width="3"/>
             <path d="M1030 750 h54" stroke-width="3"/>
           </g>
+          <g class="rb-waves" fill="none" stroke-linecap="round">
+            <path class="rb-wave rb-wave--1" d="M-100 668 q30 -9 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" stroke="rgba(255,233,179,0.30)" stroke-width="3"/>
+            <path class="rb-wave rb-wave--2" d="M-100 712 q30 -8 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" stroke="rgba(255,233,179,0.18)" stroke-width="2.5"/>
+          </g>
         </svg>
         <!-- far bank: Salé + Mohammed VI tower -->
         <svg class="rb-hero__far" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice">
@@ -108,7 +112,7 @@
       <div class="rb-hero__content">
         <p class="kicker rb-hero__kicker">Peacock Travel · Trip № 1 · Morocco</p>
         <h1 class="rb-hero__title" aria-label="Rabat">
-          <span>R</span><span>A</span><span>B</span><span>A</span><span>T</span>
+          <span>R</span><span>A</span><span>B</span><span class="rb-hero__title-i">A</span><span>T</span>
         </h1>
         <p class="rb-hero__arabic" aria-hidden="true">الرباط — capital of light</p>
         <div class="rb-hero__chips">
@@ -139,6 +143,7 @@
 
     <!-- ============ ITINERARY ============ -->
     <section class="rb-days" id="days">
+      <div class="rb-divider" aria-hidden="true"></div>
       <header class="rb-section-head">
         <p class="kicker reveal">The itinerary</p>
         <h2 class="rb-h2 reveal">Four days, drawn <em>day by day</em></h2>
@@ -202,10 +207,29 @@
 
     <!-- ============ RESTAURANTS ============ -->
     <section class="rb-eat" id="eat">
-      <header class="rb-section-head">
-        <p class="kicker reveal">The table list</p>
-        <h2 class="rb-h2 reveal">Dinner, <em>vetted</em></h2>
-        <p class="rb-section-sub reveal">The family bar is 4.5★ with a real crowd of reviews behind it. The list shows who clears it — and which icons we'd visit anyway, eyes open. Ratings checked June 2026.</p>
+      <div class="rb-divider" aria-hidden="true"></div>
+      <header class="rb-section-head rb-section-head--art">
+        <div>
+          <p class="kicker reveal">The table list</p>
+          <h2 class="rb-h2 reveal">Dinner, <em>vetted</em></h2>
+          <p class="rb-section-sub reveal">The family bar is 4.5★ with a real crowd of reviews behind it. The list shows who clears it — and which icons we'd visit anyway, eyes open. Ratings checked June 2026.</p>
+        </div>
+        <figure class="rb-arch reveal" id="eat-arch">
+          <svg class="rb-arch__art" viewBox="0 0 200 240" aria-hidden="true">
+            <rect width="200" height="240" fill="#f3e3c5"/>
+            <g fill="none" stroke="#c8552c" stroke-width="4" stroke-linecap="round">
+              <path d="M40 168 h120"/>
+              <path d="M52 168 a48 42 0 0 1 96 0"/>
+              <path d="M100 126 v-20 M100 96 a9 9 0 1 1 .1 0"/>
+              <path d="M60 188 h80" opacity="0.55"/>
+            </g>
+            <g stroke="#0e7c66" stroke-width="3" fill="none" opacity="0.7">
+              <path d="M82 70 q6 -14 0 -26 M100 64 q6 -14 0 -26 M118 70 q6 -14 0 -26"/>
+            </g>
+          </svg>
+          <img id="eat-photo" alt="A steaming Moroccan tagine in its conical clay pot" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+          <figcaption class="rb-arch__credit">Photo: Ridouan Red · CC BY-SA 4.0 · Wikimedia</figcaption>
+        </figure>
       </header>
       <ol class="rb-eat__list" id="eat-list"><!-- injected --></ol>
     </section>
@@ -222,6 +246,7 @@
 
     <!-- ============ NEIGHBOURHOODS ============ -->
     <section class="rb-hoods" id="hoods">
+      <div class="rb-divider" aria-hidden="true"></div>
       <header class="rb-section-head">
         <p class="kicker reveal">Know the ground</p>
         <h2 class="rb-h2 reveal">Rabat in <em>five quarters</em></h2>
@@ -258,6 +283,7 @@
 
     <!-- ============ PRACTICAL ============ -->
     <section class="rb-practical" id="practical">
+      <div class="rb-divider" aria-hidden="true"></div>
       <header class="rb-section-head">
         <p class="kicker reveal">Fine print</p>
         <h2 class="rb-h2 reveal">Practical <em>Peacockery</em></h2>

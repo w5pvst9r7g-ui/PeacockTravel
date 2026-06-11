@@ -193,9 +193,14 @@ window.RabatMap = (function () {
     el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: 'rgba(247,241,227,0.55)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gGeo);
     el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: COLORS.waterDeep, 'stroke-width': 1.6, 'stroke-linecap': 'round' }, gGeo);
 
-    /* rowboat crossing */
+    /* rowboat crossing (animated dashes drift across) */
     var r1 = P(34.0284, -6.8306), r2 = P(34.0306, -6.8270);
-    el('line', { x1: r1.x, y1: r1.y, x2: r2.x, y2: r2.y, stroke: 'rgba(150,205,220,0.8)', 'stroke-width': 1.6, 'stroke-dasharray': '2 5', 'stroke-linecap': 'round' }, gGeo);
+    el('line', { x1: r1.x, y1: r1.y, x2: r2.x, y2: r2.y, stroke: 'rgba(150,205,220,0.85)', 'stroke-width': 1.6, 'stroke-dasharray': '2 5', 'stroke-linecap': 'round', class: 'mp-rowboat' }, gGeo);
+
+    /* arrival ping at the airport */
+    var ap = P(34.0376, -6.7516);
+    var ping = el('g', { class: 'mp-ping', transform: 'translate(' + ap.x + ' ' + ap.y + ')' }, gGeo);
+    el('circle', { cx: 0, cy: 0, r: 10, fill: 'none', stroke: 'rgba(217,164,65,0.7)', 'stroke-width': 1.6, class: 'mp-ping__ring' }, ping);
 
     /* labels */
     label('ATLANTIC  OCEAN', 34.0560, -6.9080, 21, -27, true);
