@@ -42,19 +42,33 @@
 }
 .rb-hero__scene, .rb-hero__scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .rb-hero__sky { z-index: 1; }
-.rb-hero__far { z-index: 2; top: auto; bottom: 17%; height: 34%; opacity: 0.85; }
-.rb-hero__near { z-index: 3; top: auto; bottom: 0; height: 52%; }
+.rb-hero__far { z-index: 3; top: auto; bottom: 17%; height: 34%; opacity: 0.85; }
+.rb-hero__near { z-index: 4; top: auto; bottom: 0; height: 52%; }
 .rb-hero__photo {
-  position: absolute; inset: 0; z-index: 4; margin: 0;
+  /* the photograph sits INSIDE the illustrated scene: sky behind it,
+     silhouetted kasbah walls and palms in front, dusk-tinted to match */
+  position: absolute; inset: 0; z-index: 2; margin: 0;
   opacity: 0;
-  transition: opacity 1.6s ease;
+  transition: opacity 1.8s ease;
 }
 .rb-hero__photo.is-loaded { opacity: 1; }
-.rb-hero__photo img { width: 100%; height: 100%; object-fit: cover; }
+.rb-hero__photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) sepia(0.18) hue-rotate(-12deg) brightness(0.88) contrast(1.02);
+}
 .rb-hero__photo::after {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(12, 21, 18, 0.34) 0%, rgba(12, 21, 18, 0.05) 40%, rgba(15, 17, 38, 0.78) 100%);
+  background:
+    linear-gradient(180deg, rgba(27, 42, 94, 0.55) 0%, rgba(122, 74, 120, 0.18) 45%, rgba(39, 52, 92, 0.6) 100%);
+  mix-blend-mode: multiply;
+}
+.rb-hero__photo::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(12, 21, 18, 0.3) 0%, transparent 30%);
 }
 .rb-hero__grain {
   position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0.45;
