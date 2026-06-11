@@ -362,9 +362,34 @@ window.RabatMap = (function () {
       var c = null, id = null;
       if (s.poi && poiById[s.poi]) { c = P(poiById[s.poi].lat, poiById[s.poi].lng); id = s.poi; }
       else if (s.anchor) { c = P(s.anchor.lat, s.anchor.lng); }
-      if (c) out.push({ c: c, id: id, label: s.label });
+      if (c) out.push({ c: c, id: id, label: s.label, t: s.t });
     });
     return out;
+  }
+
+  var manifest = null;
+  function renderManifest(day, stops) {
+    if (!manifest) {
+      manifest = document.createElement('aside');
+      manifest.className = 'rb-map__manifest';
+      stage.appendChild(manifest);
+    }
+    if (!day) { manifest.hidden = true; return; }
+    var rows = stops.map(function (s, i) {
+      return '<button data-i="' + i + '"' + (s.id ? ' data-id="' + s.id + '"' : '') + '>' +
+        '<i style="background:' + (day.color || '#d9a441') + '">' + (i + 1) + '</i>' +
+        '<span><b>' + s.t + '</b>' + s.label + '</span></button>';
+    }).join('');
+    manifest.innerHTML = '<p style="--c:' + day.color + '">' + day.dow + ' — ' + day.title + '</p>' + rows;
+    manifest.hidden = false;
+    Array.prototype.forEach.call(manifest.querySelectorAll('button'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-id');
+        if (id) { openCard(id); return; }
+        var s = stops[+b.getAttribute('data-i')];
+        flyTo({ x: s.c.x - vb.w / 2, y: s.c.y - vb.h / 2, w: vb.w, h: vb.h });
+      });
+    });
   }
 
   function setDay(d, fly) {
@@ -375,10 +400,11 @@ window.RabatMap = (function () {
       b.classList.toggle('is-active', String(b.getAttribute('data-day')) === String(d));
     });
     applyLayerVisibility();
-    if (d === 'all') { if (fly !== false) flyTo(HOME); return; }
+    if (d === 'all') { renderManifest(null); if (fly !== false) flyTo(HOME); return; }
 
     var day = window.RABAT.days[d - 1];
     var stops = dayStops(day);
+    renderManifest(day, stops);
     if (!stops.length) return;
 
     /* route */
@@ -392,6 +418,8 @@ window.RabatMap = (function () {
       var t = el('text', { x: 0, y: 3.4, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, fill: '#f7f1e3', 'font-family': 'Space Grotesk, sans-serif' }, g);
       t.textContent = i + 1;
       if (s.id) g.addEventListener('click', function (e) { e.stopPropagation(); openCard(s.id); });
+      g.addEventListener('pointerenter', function () { showTip({ name: s.label }, s.c); });
+      g.addEventListener('pointerleave', hideTip);
     });
 
     /* draw-in animation */
