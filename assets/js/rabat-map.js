@@ -256,6 +256,7 @@ window.RabatMap = (function () {
   }
 
   function setDay(d, fly) {
+    if (!map) return;
     activeDay = d;
     if (window.history && history.replaceState) history.replaceState(null, '', d === 'all' ? location.pathname : '#day=' + d);
     if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
@@ -365,11 +366,28 @@ window.RabatMap = (function () {
     map.attributionControl.setPrefix(false);
     if (stage.clientWidth < stage.clientHeight) HOME = [[34.000, -6.862], [34.048, -6.798]];
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    var tileStyle = 'light_all';
+    try { tileStyle = localStorage.getItem('rbMapStyle') === 'dark' ? 'dark_all' : 'light_all'; } catch (e) {}
+    var tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/' + tileStyle + '/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · © <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
+    stage.classList.toggle('is-night', tileStyle === 'dark_all');
+
+    /* paper / night basemap toggle */
+    var styleBtn = document.createElement('button');
+    styleBtn.className = 'rb-map__style';
+    function styleLabel() { styleBtn.textContent = tileStyle === 'light_all' ? '◐ Night map' : '◐ Paper map'; }
+    styleLabel();
+    document.getElementById('map-layers').appendChild(styleBtn);
+    styleBtn.addEventListener('click', function () {
+      tileStyle = tileStyle === 'light_all' ? 'dark_all' : 'light_all';
+      tiles.setUrl('https://{s}.basemaps.cartocdn.com/' + tileStyle + '/{z}/{x}/{y}{r}.png');
+      stage.classList.toggle('is-night', tileStyle === 'dark_all');
+      styleLabel();
+      try { localStorage.setItem('rbMapStyle', tileStyle === 'dark_all' ? 'dark' : 'light'); } catch (e) {}
+    });
 
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
 
@@ -475,6 +493,7 @@ window.RabatMap = (function () {
     init: init,
     thumb: thumbSVG,
     focusPoi: function (id) {
+      if (!map) init();
       var rec = markers[id];
       if (!rec || !map) return;
       openCard(id);
