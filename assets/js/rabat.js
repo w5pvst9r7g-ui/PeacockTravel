@@ -71,13 +71,19 @@
     return '<a class="' + cls + '" href="' + href + '" target="_blank" rel="noopener">Google ↗</a>';
   }
 
+  /* ---------------- trip clock (override with window.__RB_NOW for tests) ---------------- */
+  function tripNow() { return window.__RB_NOW ? new Date(window.__RB_NOW) : new Date(); }
+  var DEP = new Date('2026-06-19T07:55:00+01:00');
+  var RET = new Date('2026-06-22T15:05:00+01:00');
+  function dayStart(n) { return new Date('2026-06-' + (18 + n) + 'T00:00:00+01:00'); }
+  function dayEnd(n) { return new Date('2026-06-' + (18 + n) + 'T23:59:59+01:00'); }
+
   /* ---------------- live countdown chip ---------------- */
   (function () {
     var chips = document.querySelector('.rb-hero__chips');
     if (!chips) return;
-    var dep = new Date('2026-06-19T07:55:00+01:00');
-    var ret = new Date('2026-06-22T15:05:00+01:00');
-    var now = new Date();
+    var dep = DEP, ret = RET;
+    var now = tripNow();
     var dayMs = 86400000;
     var txt;
     if (now < dep) {
@@ -115,10 +121,14 @@
         '</li>';
     }).join('');
     var thumb = (window.RabatMap && window.RabatMap.thumb) ? window.RabatMap.thumb(day.n) : '';
+    var now = tripNow();
+    var tag = '';
+    if (now > dayEnd(day.n)) { art.classList.add('is-past'); tag = '<span class="rb-day__tag rb-day__tag--past">✓ done</span>'; }
+    else if (now >= dayStart(day.n)) { art.classList.add('is-today'); tag = '<span class="rb-day__tag rb-day__tag--today">● today</span>'; }
     art.innerHTML =
       '<div class="rb-day__badge"><i>' + day.n + '</i></div>' +
       '<header class="rb-day__head">' +
-        '<div><span class="rb-day__dow">' + day.dow + ' · ' + day.date + '</span>' +
+        '<div><span class="rb-day__dow">' + day.dow + ' · ' + day.date + '</span>' + tag +
         '<h3 class="rb-day__title">' + day.title + '</h3></div>' +
         (thumb ? '<button class="rb-day__thumb" data-setday="' + day.n + '" aria-label="Trace ' + day.dow + ' on the map">' + thumb + '<span>⌖ trace it</span></button>' : '') +
       '</header>' +
@@ -293,6 +303,19 @@
 
   /* ---------------- map ---------------- */
   if (window.RabatMap) window.RabatMap.init();
+
+  /* during the trip: pre-select today's route on the map */
+  (function () {
+    if (/^#(poi|day)=/.test(location.hash)) return;
+    var now = tripNow();
+    if (now < dayStart(1) || now > dayEnd(4)) return;
+    for (var n = 1; n <= 4; n++) {
+      if (now >= dayStart(n) && now <= dayEnd(n)) {
+        setTimeout(function () { window.RabatMap && window.RabatMap.setDay(n, false); }, 400);
+        break;
+      }
+    }
+  })();
 
   /* deep links: #poi=<id> opens a card, #day=<n> traces a day */
   function applyHash() {

@@ -1041,3 +1041,22 @@ section[id] { scroll-margin-top: 64px; }
 
 /* footer — zellige stripe */
 .rabat .footer { border-top: 6px solid; border-image: repeating-linear-gradient(90deg, #d9a441 0 28px, #0e7c66 28px 56px, #c8552c 56px 84px, #2b4bd8 84px 112px) 6; }
+
+/* trip-time awareness */
+.rb-day__tag {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 4px 11px;
+  vertical-align: 1px;
+}
+.rb-day__tag--today { background: var(--gold); color: var(--night); animation: pulse 2.2s infinite; }
+.rb-day__tag--past { background: rgba(28, 36, 32, 0.08); color: rgba(28, 36, 32, 0.55); }
+.rb-day.is-past .rb-stops, .rb-day.is-past .rb-day__thumb { opacity: 0.55; }
+.rb-day.is-today .rb-day__badge::before, .rb-day.is-today .rb-day__badge::after {
+  box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--gold);
+}
