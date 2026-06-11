@@ -636,17 +636,23 @@ window.RabatMap = (function () {
     svg.addEventListener('click', function (e) { if (e.target === svg || e.target.parentNode === gGeo) closeCard(); });
 
     document.querySelectorAll('.rb-map__tab').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.classList.contains('is-active') ? 'true' : 'false');
       b.addEventListener('click', function () {
         var d = b.getAttribute('data-day');
         closeCard();
         setDay(d === 'all' ? 'all' : +d);
+        document.querySelectorAll('.rb-map__tab').forEach(function (x) {
+          x.setAttribute('aria-pressed', x.classList.contains('is-active') ? 'true' : 'false');
+        });
       });
     });
     document.querySelectorAll('.rb-map__layer').forEach(function (b) {
+      b.setAttribute('aria-pressed', 'true');
       b.addEventListener('click', function () {
         var l = b.getAttribute('data-layer');
         layerOn[l] = !layerOn[l];
         b.classList.toggle('is-on', layerOn[l]);
+        b.setAttribute('aria-pressed', layerOn[l] ? 'true' : 'false');
         applyLayerVisibility();
       });
     });
