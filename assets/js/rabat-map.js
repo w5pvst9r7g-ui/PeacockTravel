@@ -1,17 +1,16 @@
-/* Peacock Travel — custom Rabat map (SVG, projected from real lat/lng)
-   Stylised cartography; relationships and positions follow real coordinates. */
+/* Peacock Travel — Rabat map
+   Real OpenStreetMap geography (grey CARTO Positron tiles via Leaflet),
+   with the family's own layer on top: shaped markers, day routes, district
+   tints and the railway to Casablanca. The stylised projection below is
+   kept for the itinerary's mini-map thumbnails. */
 window.RabatMap = (function () {
   'use strict';
 
-  var SVGNS = 'http://www.w3.org/2000/svg';
-
-  /* ---------- projection ---------- */
+  /* ---------- stylised projection (thumbnails only) ---------- */
   var BBOX = { latMin: 33.928, latMax: 34.078, lngMin: -6.935, lngMax: -6.736 };
-  var KMX = 111.32 * Math.cos(34.02 * Math.PI / 180); /* km per deg lng */
-  var KMY = 110.57;                                    /* km per deg lat */
-  var S = 52;                                          /* px per km */
-  var W = (BBOX.lngMax - BBOX.lngMin) * KMX * S;
-  var H = (BBOX.latMax - BBOX.latMin) * KMY * S;
+  var KMX = 111.32 * Math.cos(34.02 * Math.PI / 180);
+  var KMY = 110.57;
+  var S = 52;
 
   function P(lat, lng) {
     return {
@@ -21,7 +20,6 @@ window.RabatMap = (function () {
   }
   function pts(arr) { return arr.map(function (c) { return P(c[0], c[1]); }); }
 
-  /* smooth path through points (Catmull-Rom → cubic Bézier) */
   function smooth(points, closed) {
     var p = points;
     if (p.length < 3) return 'M' + p.map(function (q) { return q.x + ' ' + q.y; }).join(' L');
@@ -38,20 +36,13 @@ window.RabatMap = (function () {
     if (closed) d += 'Z';
     return d;
   }
-  function poly(points) {
-    return 'M' + points.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' L') + 'Z';
-  }
 
-  /* ---------- geography (lat/lng control points) ---------- */
-  /* Atlantic coast, Rabat side, SW → river mouth headland */
+  /* coast & river control points (real coordinates, lightly stylised) */
   var COAST_RABAT = [
     [33.920, -6.960], [33.938, -6.930], [33.952, -6.912], [33.966, -6.897],
     [33.980, -6.882], [33.994, -6.870], [34.006, -6.861], [34.016, -6.854],
     [34.024, -6.847], [34.0295, -6.8408], [34.0322, -6.8378]
   ];
-  /* west breakwater out + back into the mouth */
-  var JETTY_W = [[34.0322, -6.8378], [34.0372, -6.8382], [34.0340, -6.8345]];
-  /* Bou Regreg west/Rabat bank, mouth → upstream, off the east edge */
   var RIVER_W = [
     [34.0340, -6.8345], [34.0312, -6.8328], [34.0288, -6.8311], [34.0268, -6.8291],
     [34.0252, -6.8266], [34.0243, -6.8240], [34.0238, -6.8214], [34.0227, -6.8186],
@@ -59,9 +50,6 @@ window.RabatMap = (function () {
     [34.0060, -6.8105], [34.0028, -6.8075], [34.0000, -6.8030], [33.9978, -6.7975],
     [33.9962, -6.7905], [33.9950, -6.7810], [33.9945, -6.7700], [33.9940, -6.7300]
   ];
-  /* east breakwater */
-  var JETTY_E = [[34.0392, -6.8362], [34.0368, -6.8330]];
-  /* Bou Regreg east/Salé bank, mouth → upstream (≈300–450 m off the west bank) */
   var RIVER_E = [
     [34.0368, -6.8330], [34.0344, -6.8305], [34.0320, -6.8285], [34.0300, -6.8262],
     [34.0285, -6.8240], [34.0276, -6.8215], [34.0270, -6.8190], [34.0258, -6.8160],
@@ -69,248 +57,108 @@ window.RabatMap = (function () {
     [34.0095, -6.8060], [34.0065, -6.8030], [34.0040, -6.7988], [34.0020, -6.7935],
     [34.0006, -6.7868], [33.9996, -6.7780], [33.9990, -6.7680], [33.9985, -6.7300]
   ];
-  /* Salé coast, east jetty → NE */
   var COAST_SALE = [
     [34.0392, -6.8362], [34.0398, -6.8300], [34.0420, -6.8230], [34.0455, -6.8130],
     [34.0500, -6.8020], [34.0550, -6.7900], [34.0605, -6.7770], [34.0660, -6.7640],
     [34.0720, -6.7480]
   ];
-  /* marina basin on the Salé bank (stylised) */
-  var MARINA = [
-    [34.0300, -6.8262], [34.0285, -6.8240], [34.0290, -6.8225],
-    [34.0305, -6.8230], [34.0312, -6.8250]
-  ];
-  /* medina boundary */
+  /* overlays drawn on the live map */
   var MEDINA = [
     [34.0310, -6.8395], [34.0230, -6.8440], [34.0172, -6.8422],
     [34.0248, -6.8288], [34.0300, -6.8320], [34.0317, -6.8366]
   ];
-  /* kasbah */
   var KASBAH = [
     [34.0338, -6.8366], [34.0322, -6.8388], [34.0303, -6.8374],
     [34.0307, -6.8352], [34.0323, -6.8344]
   ];
-  /* tram line L1 (Salé → bridge → centre → Agdal) */
-  var TRAM = [
-    [34.0440, -6.8160], [34.0360, -6.8210], [34.0302, -6.8244], [34.0252, -6.8268],
-    [34.0218, -6.8330], [34.0188, -6.8372], [34.0160, -6.8367], [34.0095, -6.8425],
-    [34.0010, -6.8495], [33.9930, -6.8555]
+  var RAIL = [
+    [34.0160, -6.8367], [34.0110, -6.8430], [34.0030, -6.8490], [33.9920, -6.8570],
+    [33.9760, -6.8700], [33.9580, -6.8860], [33.9380, -6.9060], [33.9180, -6.9280]
   ];
-  var BRIDGE = [[34.0250, -6.8266], [34.0303, -6.8243]];
-  var AVENUE = [[34.0258, -6.8360], [34.0190, -6.8368], [34.0160, -6.8367], [34.0080, -6.8378]];
+  var ROWBOAT = [[34.0284, -6.8306], [34.0306, -6.8270]];
 
   var COLORS = {
-    water: '#16415d', waterDeep: '#0d2433',
-    landRabat: '#24332c', landSale: '#212f2c',
-    medina: 'rgba(200, 85, 44, 0.16)', kasbah: 'rgba(86, 110, 220, 0.25)',
-    green: 'rgba(40, 120, 90, 0.4)',
-    line: 'rgba(247, 241, 227, 0.16)',
-    sight: '#2fbf9a', food: '#e0764f', stay: '#7d96ff', transit: '#d9b97f'
+    sight: '#0e7c66', food: '#c8552c', stay: '#4a63d8', transit: '#9c7c2e'
   };
 
   /* ---------- state ---------- */
-  var svg, gGeo, gRoute, gMarkers, gNums, stage, tip, card, cardBody, scaleBar;
-  var vb = { x: 0, y: 0, w: W, h: H };
-  var HOME, FULL;
-  var markers = {};   /* poiId -> {el, x, y, type} */
+  var map, stage, card, cardBody;
+  var markers = {};        /* poiId -> { m: L.Marker, type } */
+  var typeGroups = {};     /* type -> L.LayerGroup */
+  var routeLayer = null;
+  var numsLayer = null;
   var activeDay = 'all';
   var layerOn = { sight: true, food: true, stay: true, transit: true };
   var poiById = {};
+  var HOME = [[33.990, -6.884], [34.058, -6.778]];
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function el(name, attrs, parent) {
-    var n = document.createElementNS(SVGNS, name);
-    for (var k in attrs) n.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(n);
-    return n;
-  }
-
-  function rectFromLatLng(latTop, lngLeft, latBot, lngRight, pad) {
-    var a = P(latTop, lngLeft), b = P(latBot, lngRight);
-    var w = b.x - a.x, h = b.y - a.y;
-    pad = pad === undefined ? 0.12 : pad;
-    var r = { x: a.x - w * pad, y: a.y - h * pad, w: w * (1 + pad * 2), h: h * (1 + pad * 2) };
-    /* match stage aspect */
-    var ar = stage.clientWidth / stage.clientHeight;
-    if (r.w / r.h < ar) { var nw = r.h * ar; r.x -= (nw - r.w) / 2; r.w = nw; }
-    else { var nh = r.w / ar; r.y -= (nh - r.h) / 2; r.h = nh; }
-    return r;
-  }
-
-  /* ---------- drawing ---------- */
-  function drawBase() {
-    /* water background */
-    el('rect', { x: -600, y: -600, width: W + 1200, height: H + 1200, fill: COLORS.water }, gGeo);
-    /* subtle bathymetry waves */
-    for (var i = 0; i < 5; i++) {
-      var off = 18 + i * 26;
-      var wave = COAST_RABAT.map(function (c) { return [c[0] + off / (KMY * S) * 0.7, c[1] - off / (KMX * S)]; });
-      el('path', { d: smooth(pts(wave)), fill: 'none', stroke: 'rgba(150,205,220,0.07)', 'stroke-width': 1.2 }, gGeo);
+  /* Catmull-Rom sampling so routes curve gently */
+  function curve(lls, per) {
+    if (lls.length < 3) return lls;
+    per = per || 10;
+    var out = [], n = lls.length;
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = lls[Math.max(0, i - 1)], p1 = lls[i], p2 = lls[i + 1], p3 = lls[Math.min(n - 1, i + 2)];
+      for (var j = 0; j < per; j++) {
+        var t = j / per, t2 = t * t, t3 = t2 * t;
+        out.push([
+          0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+          0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
+        ]);
+      }
     }
-
-    /* Rabat land: coast → headland → west jetty → river west bank → SE corner → S/W edges */
-    var rabatLand = pts(COAST_RABAT)
-      .concat(pts(JETTY_W))
-      .concat(pts(RIVER_W))
-      .concat([{ x: W + 600, y: H + 600 }, { x: -600, y: H + 600 }]);
-    el('path', { d: poly(rabatLand), fill: COLORS.landRabat }, gGeo);
-
-    /* Salé land: east jetty → river east bank → SE edge → E edge → NE corner → Salé coast reversed */
-    var saleLand = pts(JETTY_E)
-      .concat(pts(RIVER_E))
-      .concat([{ x: W + 600, y: P(34.0052, -6.73).y + 14 }, { x: W + 600, y: -600 }])
-      .concat(pts(COAST_SALE).reverse());
-    el('path', { d: poly(saleLand), fill: COLORS.landSale }, gGeo);
-
-    /* shorelines — crisp light edges so water reads instantly */
-    function line(p) { return 'M' + p.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' L'); }
-    var shore = { fill: 'none', stroke: 'rgba(165,215,228,0.5)', 'stroke-width': 1.6, 'stroke-linejoin': 'round' };
-    el('path', Object.assign({ d: line(pts(COAST_RABAT).concat(pts(JETTY_W)).concat(pts(RIVER_W))) }, shore), gGeo);
-    el('path', Object.assign({ d: line(pts(COAST_SALE.slice().reverse()).concat(pts(JETTY_E)).concat(pts(RIVER_E))) }, shore), gGeo);
-
-    /* marina basin */
-    el('path', { d: smooth(pts(MARINA), true), fill: COLORS.water, stroke: 'rgba(165,215,228,0.45)', 'stroke-width': 1.2 }, gGeo);
-
-    /* little sails on the Atlantic */
-    [[34.0470, -6.8760], [34.0395, -6.8580], [34.0560, -6.8420]].forEach(function (b) {
-      var c = P(b[0], b[1]);
-      el('path', { d: 'M' + c.x + ' ' + (c.y - 5) + ' L' + (c.x + 3.4) + ' ' + (c.y + 2.6) + ' L' + (c.x - 3.4) + ' ' + (c.y + 2.6) + ' Z', fill: 'rgba(247,241,227,0.55)' }, gGeo);
-    });
-
-    /* districts */
-    el('path', { d: smooth(pts(MEDINA), true), fill: COLORS.medina, stroke: 'rgba(224,118,79,0.5)', 'stroke-width': 1.4, 'stroke-dasharray': '5 4' }, gGeo);
-    el('path', { d: smooth(pts(KASBAH), true), fill: COLORS.kasbah, stroke: 'rgba(125,150,255,0.6)', 'stroke-width': 1.4 }, gGeo);
-
-    /* greens */
-    [[34.0306, -6.8348, 7], [34.0067, -6.8203, 13], [34.0017, -6.8410, 17], [33.954, -6.883, 20], [34.012, -6.846, 9], [33.985, -6.824, 14]].forEach(function (g) {
-      var c = P(g[0], g[1]);
-      el('circle', { cx: c.x, cy: c.y, r: g[2], fill: COLORS.green }, gGeo);
-    });
-
-    /* roads / tram */
-    el('path', { d: smooth(pts(AVENUE)), fill: 'none', stroke: COLORS.line, 'stroke-width': 2.4 }, gGeo);
-    el('path', { d: smooth(pts(TRAM)), fill: 'none', stroke: 'rgba(217,185,127,0.45)', 'stroke-width': 1.6, 'stroke-dasharray': '8 5' }, gGeo);
-
-    /* ONCF railway south to Casablanca (Friday's ride) */
-    var RAIL = [
-      [34.0160, -6.8367], [34.0110, -6.8430], [34.0030, -6.8490], [33.9920, -6.8570],
-      [33.9760, -6.8700], [33.9580, -6.8860], [33.9380, -6.9060], [33.9180, -6.9280]
-    ];
-    el('path', { d: smooth(pts(RAIL)), fill: 'none', stroke: 'rgba(217,164,65,0.75)', 'stroke-width': 2.2, 'stroke-dasharray': '12 6' }, gGeo);
-    label('→ Casablanca · 1 h by train', 33.9665, -6.8930, 9.5, -38);
-    var b1 = P(BRIDGE[0][0], BRIDGE[0][1]), b2 = P(BRIDGE[1][0], BRIDGE[1][1]);
-    el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: 'rgba(247,241,227,0.55)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gGeo);
-    el('line', { x1: b1.x, y1: b1.y, x2: b2.x, y2: b2.y, stroke: COLORS.waterDeep, 'stroke-width': 1.6, 'stroke-linecap': 'round' }, gGeo);
-
-    /* rowboat crossing (animated dashes drift across) */
-    var r1 = P(34.0284, -6.8306), r2 = P(34.0306, -6.8270);
-    el('line', { x1: r1.x, y1: r1.y, x2: r2.x, y2: r2.y, stroke: 'rgba(150,205,220,0.85)', 'stroke-width': 1.6, 'stroke-dasharray': '2 5', 'stroke-linecap': 'round', class: 'mp-rowboat' }, gGeo);
-
-    /* arrival ping at the airport */
-    var ap = P(34.0376, -6.7516);
-    var ping = el('g', { class: 'mp-ping', transform: 'translate(' + ap.x + ' ' + ap.y + ')' }, gGeo);
-    el('circle', { cx: 0, cy: 0, r: 10, fill: 'none', stroke: 'rgba(217,164,65,0.7)', 'stroke-width': 1.6, class: 'mp-ping__ring' }, ping);
-
-    /* labels */
-    label('ATLANTIC  OCEAN', 34.0560, -6.9080, 21, -27, true);
-    label('Bou Regreg', 34.0148, -6.8088, 12.5, 38, true);
-    label('R A B A T', 34.0075, -6.8650, 19, 0);
-    label('S A L É', 34.0520, -6.7950, 16, 0);
-    label('Medina', 34.0228, -6.8402, 9.5, 0);
-    label('Kasbah', 34.0344, -6.8404, 9, 0);
-    label('Hassan', 34.0182, -6.8268, 9, 0);
-    label('Ville Nouvelle', 34.0108, -6.8420, 9, 0);
-    label('Agdal', 33.9905, -6.8565, 10, 0);
-    label('Souissi', 33.9840, -6.8330, 10, 0);
-    label('Hay Riad', 33.9590, -6.8740, 10, 0);
-    label('marina', 34.0322, -6.8198, 7.5, 0, true);
+    out.push(lls[n - 1]);
+    return out;
   }
 
-  function label(txt, lat, lng, size, rot, water) {
-    var c = P(lat, lng);
-    var t = el('text', {
-      x: c.x, y: c.y,
-      'font-size': size,
-      'letter-spacing': size > 14 ? 3 : 1.5,
-      'text-anchor': 'middle',
-      class: 'mp-label' + (water ? ' mp-label--water' : ''),
-      transform: rot ? 'rotate(' + rot + ' ' + c.x + ' ' + c.y + ')' : ''
-    }, gGeo);
-    t.textContent = txt;
+  /* ---------- markers ---------- */
+  function shapeHTML(type) {
+    var c = COLORS[type], s = '';
+    if (type === 'sight') s = '<path d="M0 -7.6 L7 0 L0 7.6 L-7 0 Z"/>';
+    else if (type === 'food') s = '<circle r="6.6"/><circle r="2" fill="#fff" stroke="none"/>';
+    else if (type === 'stay') s = '<rect x="-6" y="-6" width="12" height="12" rx="3.2"/>';
+    else s = '<path d="M0 -7.4 L7 5.6 L-7 5.6 Z"/>';
+    return '<svg viewBox="-10 -10 20 20" width="24" height="24" style="overflow:visible">' +
+      '<g fill="' + c + '" stroke="#fffdf6" stroke-width="1.8">' + s + '</g></svg>';
   }
 
-  /* marker shapes by type */
-  function markerShape(type, g) {
-    if (type === 'sight') {
-      el('path', { d: 'M0 -8 L7 0 L0 8 L-7 0 Z', fill: COLORS.sight, stroke: '#f7f1e3', 'stroke-width': 1.6, class: 'bg' }, g);
-    } else if (type === 'food') {
-      el('circle', { cx: 0, cy: 0, r: 7, fill: COLORS.food, stroke: '#f7f1e3', 'stroke-width': 1.6, class: 'bg' }, g);
-      el('circle', { cx: 0, cy: 0, r: 2.2, fill: '#f7f1e3' }, g);
-    } else if (type === 'stay') {
-      el('rect', { x: -6.5, y: -6.5, width: 13, height: 13, rx: 3.5, fill: COLORS.stay, stroke: '#f7f1e3', 'stroke-width': 1.6, class: 'bg' }, g);
-    } else {
-      el('path', { d: 'M0 -8 L7.5 6 L-7.5 6 Z', fill: COLORS.transit, stroke: '#f7f1e3', 'stroke-width': 1.6, class: 'bg' }, g);
-    }
+  function tipText(poi) {
+    var r = poi.rating || {};
+    return poi.name + (r.score ? '  ·  ' + r.score + (r.src === 'Booking.com' ? '/10' : '★') : '');
   }
 
   function drawMarkers(pois) {
+    ['sight', 'food', 'stay', 'transit'].forEach(function (t) {
+      typeGroups[t] = L.layerGroup().addTo(map);
+    });
     pois.forEach(function (poi) {
       poiById[poi.id] = poi;
-      var c = P(poi.lat, poi.lng);
-      var g = el('g', { class: 'mp-marker', 'data-id': poi.id, 'data-type': poi.type, tabindex: 0, role: 'button', 'aria-label': poi.name }, gMarkers);
-      markerShape(poi.type, g);
-      markers[poi.id] = { el: g, x: c.x, y: c.y, type: poi.type };
-      g.addEventListener('click', function (e) { e.stopPropagation(); openCard(poi.id); });
-      g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(poi.id); } });
-      g.addEventListener('pointerenter', function () { showTip(poi, c); });
-      g.addEventListener('pointerleave', hideTip);
+      var m = L.marker([poi.lat, poi.lng], {
+        icon: L.divIcon({ className: 'lf-pin lf-pin--' + poi.type, html: shapeHTML(poi.type), iconSize: [24, 24], iconAnchor: [12, 12] }),
+        keyboard: true, title: poi.name
+      });
+      m.bindTooltip(tipText(poi), { direction: 'top', offset: [0, -10], className: 'lf-tip' });
+      m.on('click', function () { openCard(poi.id); });
+      m.addTo(typeGroups[poi.type]);
+      markers[poi.id] = { m: m, type: poi.type };
     });
-    layoutMarkers();
   }
 
-  /* counter-scale markers so they keep apparent size while zooming */
-  function layoutMarkers() {
-    var f = vb.w / HOME.w;
-    Object.keys(markers).forEach(function (id) {
-      var m = markers[id];
-      m.el.setAttribute('transform', 'translate(' + m.x + ' ' + m.y + ') scale(' + (f * 1.0).toFixed(3) + ')');
-    });
-    gNums.setAttribute('data-f', f);
-    Array.prototype.forEach.call(gNums.children, function (n) {
-      var x = +n.getAttribute('data-x'), y = +n.getAttribute('data-y');
-      n.setAttribute('transform', 'translate(' + x + ' ' + y + ') scale(' + f.toFixed(3) + ')');
-    });
-    Array.prototype.forEach.call(gRoute.querySelectorAll('.mp-route'), function (p) {
-      p.setAttribute('stroke-width', (2.6 * f).toFixed(2));
-      p.setAttribute('stroke-dasharray', (7 * f).toFixed(1) + ' ' + (7 * f).toFixed(1));
-    });
-    updateScaleBar();
-  }
-
-  /* ---------- tooltip & card ---------- */
-  function showTip(poi, c) {
-    var pt = toScreen(c.x, c.y);
-    tip.textContent = poi.name + (poi.rating && poi.rating.score ? '  ·  ' + poi.rating.score + (poi.rating.src === 'Booking.com' ? '/10' : '★') : '');
-    tip.style.left = pt.x + 'px';
-    tip.style.top = pt.y + 'px';
-    tip.hidden = false;
-  }
-  function hideTip() { tip.hidden = true; }
-
-  function toScreen(x, y) {
-    var r = stage.getBoundingClientRect();
-    return { x: (x - vb.x) / vb.w * r.width, y: (y - vb.y) / vb.h * r.height };
-  }
-
+  /* ---------- detail card (unchanged design) ---------- */
   function stars(score) {
     var pct = Math.max(0, Math.min(100, score / 5 * 100));
     return '<span class="mc-stars" style="position:relative;color:rgba(28,36,32,0.2)">★★★★★<i style="position:absolute;left:0;top:0;width:' + pct + '%;overflow:hidden;color:#d9a441;font-style:normal">★★★★★</i></span>';
   }
-
   var TYPE_LABEL = { sight: 'Sight', food: 'Table', stay: 'Stay', transit: 'Getting around' };
+
   function openCard(id) {
     var poi = poiById[id];
     if (!poi) return;
-    Object.keys(markers).forEach(function (k) { markers[k].el.classList.toggle('is-active', k === id); });
+    Object.keys(markers).forEach(function (k) {
+      var el = markers[k].m.getElement();
+      if (el) el.classList.toggle('is-active', k === id);
+    });
     var r = poi.rating || {};
     var ratingHtml = '';
     if (r.score && r.src === 'Booking.com') {
@@ -346,23 +194,24 @@ window.RabatMap = (function () {
       im.alt = poi.name;
     }
     card.hidden = false;
-    /* gently centre the marker */
-    var m = markers[id];
-    flyTo({ x: m.x - vb.w / 2, y: m.y - vb.h / 2, w: vb.w, h: vb.h });
+    map.panTo([poi.lat, poi.lng], { animate: !RM, duration: 0.8 });
   }
   function closeCard() {
     card.hidden = true;
-    Object.keys(markers).forEach(function (k) { markers[k].el.classList.remove('is-active'); });
+    Object.keys(markers).forEach(function (k) {
+      var el = markers[k].m.getElement();
+      if (el) el.classList.remove('is-active');
+    });
   }
 
   /* ---------- day routes ---------- */
   function dayStops(day) {
     var out = [];
     day.stops.forEach(function (s) {
-      var c = null, id = null;
-      if (s.poi && poiById[s.poi]) { c = P(poiById[s.poi].lat, poiById[s.poi].lng); id = s.poi; }
-      else if (s.anchor) { c = P(s.anchor.lat, s.anchor.lng); }
-      if (c) out.push({ c: c, id: id, label: s.label, t: s.t });
+      var ll = null, id = null;
+      if (s.poi && poiById[s.poi]) { ll = [poiById[s.poi].lat, poiById[s.poi].lng]; id = s.poi; }
+      else if (s.anchor) { ll = [s.anchor.lat, s.anchor.lng]; }
+      if (ll) out.push({ ll: ll, id: id, label: s.label, t: s.t });
     });
     return out;
   }
@@ -386,200 +235,89 @@ window.RabatMap = (function () {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-id');
         if (id) { openCard(id); return; }
-        var s = stops[+b.getAttribute('data-i')];
-        flyTo({ x: s.c.x - vb.w / 2, y: s.c.y - vb.h / 2, w: vb.w, h: vb.h });
+        map.flyTo(stops[+b.getAttribute('data-i')].ll, Math.max(map.getZoom(), 15), { animate: !RM });
       });
     });
   }
 
   function setDay(d, fly) {
     activeDay = d;
-    gRoute.innerHTML = '';
-    gNums.innerHTML = '';
+    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+    if (numsLayer) { map.removeLayer(numsLayer); numsLayer = null; }
     document.querySelectorAll('.rb-map__tab').forEach(function (b) {
-      b.classList.toggle('is-active', String(b.getAttribute('data-day')) === String(d));
+      var on = String(b.getAttribute('data-day')) === String(d);
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     applyLayerVisibility();
-    if (d === 'all') { renderManifest(null); if (fly !== false) flyTo(HOME); return; }
+    if (d === 'all') { renderManifest(null); if (fly !== false) map.flyToBounds(HOME, { animate: !RM, duration: 1.1 }); return; }
 
     var day = window.RABAT.days[d - 1];
     var stops = dayStops(day);
     renderManifest(day, stops);
     if (!stops.length) return;
 
-    /* route */
-    var path = el('path', { d: smooth(stops.map(function (s) { return s.c; })), class: 'mp-route' }, gRoute);
-    path.setAttribute('stroke', day.color || '#d9a441');
+    routeLayer = L.polyline(curve(stops.map(function (s) { return s.ll; })), {
+      color: day.color || '#d9a441', weight: 3.5, dashArray: '8 8', opacity: 0.95, lineCap: 'round'
+    }).addTo(map);
 
-    /* numbered badges */
+    numsLayer = L.layerGroup().addTo(map);
     stops.forEach(function (s, i) {
-      var g = el('g', { class: 'mp-num', 'data-x': s.c.x, 'data-y': s.c.y, role: 'button', 'aria-label': 'Stop ' + (i + 1) + ': ' + s.label }, gNums);
-      el('circle', { cx: 0, cy: 0, r: 9.5, fill: day.color || '#d9a441', stroke: '#f7f1e3', 'stroke-width': 1.8 }, g);
-      var t = el('text', { x: 0, y: 3.4, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, fill: '#f7f1e3', 'font-family': 'Space Grotesk, sans-serif' }, g);
-      t.textContent = i + 1;
-      if (s.id) g.addEventListener('click', function (e) { e.stopPropagation(); openCard(s.id); });
-      g.addEventListener('pointerenter', function () { showTip({ name: s.label }, s.c); });
-      g.addEventListener('pointerleave', hideTip);
+      var m = L.marker(s.ll, {
+        icon: L.divIcon({
+          className: 'lf-num',
+          html: '<span style="background:' + (day.color || '#d9a441') + '">' + (i + 1) + '</span>',
+          iconSize: [24, 24], iconAnchor: [12, 12]
+        }),
+        zIndexOffset: 600, title: s.label
+      });
+      m.bindTooltip(s.t + ' — ' + s.label, { direction: 'top', offset: [0, -10], className: 'lf-tip' });
+      if (s.id) m.on('click', function () { openCard(s.id); });
+      m.addTo(numsLayer);
     });
 
-    /* draw-in animation */
-    var len = path.getTotalLength();
-    path.style.strokeDasharray = len;
-    path.style.strokeDashoffset = len;
-    if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.to(path.style, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut', delay: 0.3, onComplete: function () { layoutMarkers(); } });
-    } else {
-      path.style.strokeDashoffset = 0;
-      layoutMarkers();
-    }
-
-    /* fit route */
-    if (fly !== false) {
-      var xs = stops.map(function (s) { return s.c.x; }), ys = stops.map(function (s) { return s.c.y; });
-      var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
-      var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-      var pad = Math.max((maxX - minX), (maxY - minY)) * 0.22 + 30;
-      flyTo(fitAspect({ x: minX - pad, y: minY - pad, w: (maxX - minX) + pad * 2, h: (maxY - minY) + pad * 2 }));
-    }
-    layoutMarkers();
-  }
-
-  function fitAspect(r) {
-    var ar = stage.clientWidth / stage.clientHeight;
-    if (r.w / r.h < ar) { var nw = r.h * ar; r.x -= (nw - r.w) / 2; r.w = nw; }
-    else { var nh = r.w / ar; r.y -= (nh - r.h) / 2; r.h = nh; }
-    return r;
+    if (fly !== false) map.flyToBounds(routeLayer.getBounds().pad(0.22), { animate: !RM, duration: 1.1 });
   }
 
   function applyLayerVisibility() {
     Object.keys(markers).forEach(function (id) {
-      var m = markers[id];
-      var visible = layerOn[m.type] !== false;
+      var rec = markers[id];
+      var visible = layerOn[rec.type] !== false;
+      var el = rec.m.getElement();
+      if (!el) return;
       if (activeDay !== 'all') {
         var day = window.RABAT.days[activeDay - 1];
         var inDay = day.stops.some(function (s) { return s.poi === id; });
-        m.el.style.opacity = inDay ? 1 : (visible ? 0.22 : 0);
-        m.el.style.pointerEvents = (inDay || visible) ? 'auto' : 'none';
+        el.style.opacity = inDay ? 1 : (visible ? 0.25 : 0);
+        el.style.pointerEvents = (inDay || visible) ? 'auto' : 'none';
       } else {
-        m.el.style.opacity = visible ? 1 : 0;
-        m.el.style.pointerEvents = visible ? 'auto' : 'none';
+        el.style.opacity = visible ? 1 : 0;
+        el.style.pointerEvents = visible ? 'auto' : 'none';
       }
     });
   }
 
-  /* ---------- view control ---------- */
-  function setViewBox(r) {
-    vb = r;
-    svg.setAttribute('viewBox', r.x.toFixed(1) + ' ' + r.y.toFixed(1) + ' ' + r.w.toFixed(1) + ' ' + r.h.toFixed(1));
-  }
-  var flyTween = null;
-  function flyTo(r) {
-    hideTip();
-    if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      if (flyTween) flyTween.kill();
-      var s0 = { x: vb.x, y: vb.y, w: vb.w, h: vb.h };
-      flyTween = gsap.to(s0, {
-        x: r.x, y: r.y, w: r.w, h: r.h,
-        duration: 1.25, ease: 'power3.inOut',
-        onUpdate: function () { setViewBox({ x: s0.x, y: s0.y, w: s0.w, h: s0.h }); layoutMarkers(); }
-      });
-    } else {
-      setViewBox(r);
-      layoutMarkers();
-    }
-  }
-
-  function zoom(factor, cx, cy) {
-    var r = stage.getBoundingClientRect();
-    cx = cx === undefined ? r.width / 2 : cx;
-    cy = cy === undefined ? r.height / 2 : cy;
-    var mx = vb.x + cx / r.width * vb.w;
-    var my = vb.y + cy / r.height * vb.h;
-    var nw = Math.min(Math.max(vb.w / factor, W * 0.045), W * 1.4);
-    var nh = nw * vb.h / vb.w;
-    flyTo({ x: mx - (mx - vb.x) * nw / vb.w, y: my - (my - vb.y) * nh / vb.h, w: nw, h: nh });
-  }
-
-  function updateScaleBar() {
-    if (!scaleBar) return;
-    var r = stage.getBoundingClientRect();
-    var kmPerPx = vb.w / S / r.width;
-    var targetPx = 90;
-    var km = kmPerPx * targetPx;
-    var nice = [0.25, 0.5, 1, 2, 5, 10].reduce(function (a, b) { return Math.abs(b - km) < Math.abs(a - km) ? b : a; });
-    scaleBar.querySelector('i').style.width = (nice / kmPerPx).toFixed(0) + 'px';
-    scaleBar.querySelector('b').textContent = nice < 1 ? (nice * 1000) + ' m' : nice + ' km';
-  }
-
-  /* ---------- pan / pinch ---------- */
-  function bindPointer(canvas) {
-    var pointers = new Map();
-    var start = null;
-
-    canvas.addEventListener('pointerdown', function (e) {
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      canvas.setPointerCapture(e.pointerId);
-      if (pointers.size === 1) {
-        start = { px: e.clientX, py: e.clientY, vb: { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, moved: false };
-        canvas.classList.add('is-panning');
-        if (flyTween) flyTween.kill();
-      } else if (pointers.size === 2) {
-        var arr = Array.from(pointers.values());
-        start = {
-          pinch: true,
-          d0: Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y),
-          mid: { x: (arr[0].x + arr[1].x) / 2, y: (arr[0].y + arr[1].y) / 2 },
-          vb: { x: vb.x, y: vb.y, w: vb.w, h: vb.h }
-        };
-      }
-    });
-
-    canvas.addEventListener('pointermove', function (e) {
-      if (!pointers.has(e.pointerId) || !start) return;
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      var r = stage.getBoundingClientRect();
-      if (start.pinch && pointers.size === 2) {
-        var arr = Array.from(pointers.values());
-        var d1 = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
-        var f = Math.min(Math.max(d1 / start.d0, 0.3), 3.5);
-        var nw = Math.min(Math.max(start.vb.w / f, W * 0.045), W * 1.4);
-        var nh = nw * start.vb.h / start.vb.w;
-        var mx = start.vb.x + (start.mid.x - r.left) / r.width * start.vb.w;
-        var my = start.vb.y + (start.mid.y - r.top) / r.height * start.vb.h;
-        setViewBox({ x: mx - (mx - start.vb.x) * nw / start.vb.w, y: my - (my - start.vb.y) * nh / start.vb.h, w: nw, h: nh });
-        layoutMarkers();
-      } else if (!start.pinch) {
-        var dx = (e.clientX - start.px) * vb.w / r.width;
-        var dy = (e.clientY - start.py) * vb.h / r.height;
-        if (Math.abs(e.clientX - start.px) + Math.abs(e.clientY - start.py) > 4) start.moved = true;
-        setViewBox({ x: start.vb.x - dx, y: start.vb.y - dy, w: start.vb.w, h: start.vb.h });
-        layoutMarkers();
-      }
-    });
-
-    function up(e) {
-      pointers.delete(e.pointerId);
-      if (pointers.size === 0) { canvas.classList.remove('is-panning'); start = null; }
-    }
-    canvas.addEventListener('pointerup', up);
-    canvas.addEventListener('pointercancel', up);
-
-    canvas.addEventListener('dblclick', function (e) {
-      var r = stage.getBoundingClientRect();
-      zoom(1.7, e.clientX - r.left, e.clientY - r.top);
-    });
-
-    canvas.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      var r = stage.getBoundingClientRect();
-      zoom(e.deltaY < 0 ? 1.25 : 0.8, e.clientX - r.left, e.clientY - r.top);
-    }, { passive: false });
+  /* ---------- our overlay geography on the real map ---------- */
+  function drawOverlays() {
+    L.polygon(MEDINA, { color: '#c8552c', weight: 1.6, dashArray: '5 4', fillColor: '#c8552c', fillOpacity: 0.08, interactive: false }).addTo(map);
+    L.polygon(KASBAH, { color: '#4a63d8', weight: 1.6, fillColor: '#4a63d8', fillOpacity: 0.1, interactive: false }).addTo(map);
+    L.polyline(curve(RAIL), { color: '#b8860b', weight: 2.5, dashArray: '10 6', opacity: 0.8 })
+      .bindTooltip('ONCF railway → Casablanca · ~1 h', { sticky: true, className: 'lf-tip' }).addTo(map);
+    L.polyline(ROWBOAT, { color: '#2b6f8f', weight: 2, dashArray: '2 6', opacity: 0.9, lineCap: 'round' })
+      .bindTooltip('Blue rowboat crossing · 2.5–5 MAD', { sticky: true, className: 'lf-tip' }).addTo(map);
   }
 
   /* ---------- inset ---------- */
   function drawInset() {
     var insetSvg = document.getElementById('inset-svg');
     if (!insetSvg || !window.MA_OUTLINE) return;
+    var SVGNS = 'http://www.w3.org/2000/svg';
+    function el(name, attrs, parent) {
+      var n = document.createElementNS(SVGNS, name);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      if (parent) parent.appendChild(n);
+      return n;
+    }
     var lats = MA_OUTLINE.map(function (c) { return c[0]; });
     var lngs = MA_OUTLINE.map(function (c) { return c[1]; });
     var la0 = Math.min.apply(null, lats), la1 = Math.max.apply(null, lats);
@@ -597,43 +335,45 @@ window.RabatMap = (function () {
   function init() {
     stage = document.getElementById('map-stage');
     var canvas = document.getElementById('map-canvas');
-    tip = document.getElementById('map-tip');
     card = document.getElementById('map-card');
     cardBody = document.getElementById('map-card-body');
-    if (!stage || !canvas || !window.RABAT) return;
+    if (!stage || !canvas || !window.RABAT || !window.L) return;
 
-    svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid slice', 'aria-label': 'Stylised map of Rabat and Salé' });
-    canvas.appendChild(svg);
-    gGeo = el('g', {}, svg);
-    gRoute = el('g', {}, svg);
-    gMarkers = el('g', {}, svg);
-    gNums = el('g', {}, svg);
+    map = L.map(canvas, {
+      zoomControl: false,
+      attributionControl: true,
+      scrollWheelZoom: false,
+      minZoom: 11,
+      maxZoom: 18,
+      maxBounds: [[33.80, -7.15], [34.22, -6.50]],
+      maxBoundsViscosity: 0.8
+    });
+    map.attributionControl.setPrefix(false);
+    if (stage.clientWidth < stage.clientHeight) HOME = [[34.000, -6.862], [34.048, -6.798]];
 
-    var portrait = stage.clientWidth < stage.clientHeight;
-    HOME = portrait
-      ? rectFromLatLng(34.046, -6.862, 34.000, -6.800, 0.05)
-      : rectFromLatLng(34.052, -6.882, 33.994, -6.782, 0.04);
-    FULL = fitAspect({ x: 0, y: 0, w: W, h: H });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · © <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
 
-    drawBase();
+    L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+    map.fitBounds(HOME);
+
+    /* wheel zoom only after the map has been clicked — keeps page scroll sane */
+    map.on('click focus', function () { map.scrollWheelZoom.enable(); });
+    map.on('mouseout blur', function () { map.scrollWheelZoom.disable(); });
+
+    drawOverlays();
     drawMarkers(window.RABAT.pois);
     drawInset();
 
-    /* scale bar + compass */
-    scaleBar = document.createElement('div');
-    scaleBar.className = 'rb-map__scale';
-    scaleBar.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1 L11 11 L8 8.6 L5 11 Z" fill="#f7f1e3"/></svg><em>N</em><i></i><b></b>';
-    stage.appendChild(scaleBar);
-
-    setViewBox(HOME);
-    layoutMarkers();
-
-    bindPointer(canvas);
-    document.getElementById('zoom-in').addEventListener('click', function () { zoom(1.45); });
-    document.getElementById('zoom-out').addEventListener('click', function () { zoom(0.69); });
+    document.getElementById('zoom-in').addEventListener('click', function () { map.zoomIn(); });
+    document.getElementById('zoom-out').addEventListener('click', function () { map.zoomOut(); });
     document.getElementById('zoom-reset').addEventListener('click', function () { closeCard(); setDay('all'); });
     document.getElementById('map-card-close').addEventListener('click', closeCard);
-    svg.addEventListener('click', function (e) { if (e.target === svg || e.target.parentNode === gGeo) closeCard(); });
+    map.on('click', closeCard);
 
     document.querySelectorAll('.rb-map__tab').forEach(function (b) {
       b.setAttribute('aria-pressed', b.classList.contains('is-active') ? 'true' : 'false');
@@ -641,9 +381,6 @@ window.RabatMap = (function () {
         var d = b.getAttribute('data-day');
         closeCard();
         setDay(d === 'all' ? 'all' : +d);
-        document.querySelectorAll('.rb-map__tab').forEach(function (x) {
-          x.setAttribute('aria-pressed', x.classList.contains('is-active') ? 'true' : 'false');
-        });
       });
     });
     document.querySelectorAll('.rb-map__layer').forEach(function (b) {
@@ -657,10 +394,10 @@ window.RabatMap = (function () {
       });
     });
 
-    window.addEventListener('resize', function () { setViewBox(vb); layoutMarkers(); });
+    window.addEventListener('resize', function () { map.invalidateSize(); });
   }
 
-  /* static mini-map SVG for a day's route (no init required) */
+  /* ---------- static mini-map thumbnail (stylised, self-contained) ---------- */
   function thumbSVG(n) {
     var day = window.RABAT.days[n - 1];
     if (!day) return '';
@@ -680,7 +417,7 @@ window.RabatMap = (function () {
     var ar = 4 / 3;
     if (bw / bh < ar) { var nw = bh * ar; bx -= (nw - bw) / 2; bw = nw; }
     else { var nh = bw / ar; by -= (nh - bh) / 2; bh = nh; }
-    var sw = bw / 110; /* hairline scaled to view */
+    var sw = bw / 110;
     var geo = '';
     [COAST_RABAT, COAST_SALE, RIVER_W, RIVER_E].forEach(function (line) {
       geo += '<path d="' + smooth(pts(line)) + '" fill="none" stroke="rgba(165,215,228,0.4)" stroke-width="' + sw + '"/>';
@@ -699,12 +436,10 @@ window.RabatMap = (function () {
     init: init,
     thumb: thumbSVG,
     focusPoi: function (id) {
-      if (!markers[id]) return;
-      var m = markers[id];
-      var nw = Math.min(vb.w, HOME.w * 0.5);
-      var nh = nw * vb.h / vb.w;
+      var rec = markers[id];
+      if (!rec || !map) return;
       openCard(id);
-      flyTo({ x: m.x - nw / 2, y: m.y - nh / 2, w: nw, h: nh });
+      map.flyTo(rec.m.getLatLng(), Math.max(map.getZoom(), 15), { animate: !RM, duration: 1 });
     },
     setDay: setDay
   };

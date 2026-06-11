@@ -16,6 +16,7 @@
   <link rel="preload" href="assets/fonts/fraunces-latin-opsz-italic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/space-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/vendor/leaflet.css" />
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/rabat.css" />
 </head>
@@ -208,11 +209,9 @@
             <button class="rb-map__card-close" id="map-card-close" aria-label="Close details">✕</button>
             <div id="map-card-body"></div>
           </aside>
-
-          <div class="rb-map__tip" id="map-tip" hidden></div>
         </div>
 
-        <p class="rb-map__note">Illustrative map, faithfully projected from real coordinates · north is up · ≈ scale shown bottom-left</p>
+        <p class="rb-map__note">Live map · geography © OpenStreetMap contributors / © CARTO · our pins, routes &amp; district tints on top</p>
       </div>
     </section>
 
@@ -322,6 +321,7 @@
 
   <script src="assets/js/vendor/gsap.min.js"></script>
   <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
+  <script src="assets/js/vendor/leaflet.js"></script>
   <script src="assets/data/morocco-outline.js"></script>
   <script src="assets/data/rabat-data.js"></script>
   <script src="assets/js/rabat-map.js"></script>

@@ -392,25 +392,55 @@
   background: #0d2433;
   height: clamp(440px, 72vh, 760px);
 }
-.rb-map__canvas, .rb-map__canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.rb-map__canvas { cursor: grab; touch-action: none; }
-.rb-map__canvas.is-panning { cursor: grabbing; }
+/* z-index:1 creates a stacking context so Leaflet's internal panes stay below our panels */
+.rb-map__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 
-/* svg internals */
-.mp-label {
-  font-family: 'Space Grotesk', sans-serif;
-  text-transform: uppercase;
-  fill: rgba(247, 241, 227, 0.5);
-  pointer-events: none;
+/* leaflet skin — grey OSM tiles, our palette on the chrome */
+.leaflet-container {
+  background: #e7e3d8;
+  font-family: var(--grotesk);
 }
-.mp-label--water { fill: rgba(150, 205, 220, 0.65); font-style: italic; }
-.mp-marker { cursor: pointer; }
-.mp-marker .bg { transition: stroke-width 0.2s var(--ease-out); }
-.mp-marker:hover .bg, .mp-marker.is-active .bg { stroke-width: 3; }
-.mp-marker.is-active .bg { filter: drop-shadow(0 0 6px rgba(247, 241, 227, 0.7)); }
-.mp-marker text { pointer-events: none; }
-.mp-route { fill: none; stroke: var(--gold); stroke-dasharray: 7 7; }
-.mp-num { cursor: pointer; }
+.rb-map__stage .leaflet-tile-pane { filter: grayscale(0.15) sepia(0.06); }
+.lf-pin { transition: transform 0.2s var(--ease-out), opacity 0.3s; filter: drop-shadow(0 2px 4px rgba(28, 36, 32, 0.35)); }
+.lf-pin:hover, .lf-pin.is-active { transform: scale(1.3); z-index: 700 !important; }
+.lf-pin.is-active { filter: drop-shadow(0 0 7px rgba(217, 164, 65, 0.9)); }
+.lf-num span {
+  display: grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid #fffdf6;
+  color: #fffdf6;
+  font-weight: 700;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 6px rgba(28, 36, 32, 0.4);
+}
+.lf-tip {
+  background: var(--night) !important;
+  color: var(--cream) !important;
+  border: 1px solid rgba(247, 241, 227, 0.3) !important;
+  border-radius: 8px !important;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 6px 11px !important;
+  box-shadow: none !important;
+}
+.lf-tip::before { display: none; }
+.leaflet-control-attribution {
+  background: rgba(247, 241, 227, 0.85) !important;
+  color: rgba(28, 36, 32, 0.7) !important;
+  font-size: 0.58rem !important;
+  border-radius: 8px 0 0 0;
+  padding: 2px 8px !important;
+}
+.leaflet-control-attribution a { color: rgba(28, 36, 32, 0.85) !important; }
+.leaflet-control-scale-line {
+  background: rgba(247, 241, 227, 0.8) !important;
+  border-color: rgba(28, 36, 32, 0.55) !important;
+  color: var(--ink) !important;
+  font-size: 0.62rem !important;
+}
 
 .rb-map__zoom {
   position: absolute;
@@ -965,14 +995,6 @@ section[id] { scroll-margin-top: 64px; }
   0% { transform: scale(0.35); opacity: 1; }
   70% { transform: scale(1.6); opacity: 0; }
   100% { transform: scale(1.6); opacity: 0; }
-}
-.rb-map__stage::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(120% 100% at 50% 40%, transparent 62%, rgba(5, 12, 16, 0.38) 100%);
-  z-index: 4;
 }
 @media (prefers-reduced-motion: reduce) {
   .mp-rowboat, .mp-ping__ring { animation: none; }
