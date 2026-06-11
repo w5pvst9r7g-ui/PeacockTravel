@@ -177,6 +177,22 @@
     var b = m[2] ? Math.round(parseInt(m[2].replace(/,/g, ''), 10) / 3) : null;
     return '≈ €' + a + (b ? '–' + b : '') + ' a night';
   }
+  /* distance context: walking/taxi time from each stay to the anchors */
+  function km(aLat, aLng, bLat, bLng) {
+    var dy = (bLat - aLat) * 110.57;
+    var dx = (bLng - aLng) * 111.32 * Math.cos(34.02 * Math.PI / 180);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  var KASBAH = [34.0317, -6.8359], HASSANT = [34.0226, -6.8208];
+  function distLine(s) {
+    var kKas = km(s.lat, s.lng, KASBAH[0], KASBAH[1]);
+    var kHas = km(s.lat, s.lng, HASSANT[0], HASSANT[1]);
+    var wKas = Math.max(2, Math.round(kKas * 13));
+    var wHas = Math.max(2, Math.round(kHas * 13));
+    if (/Salé/.test(s.area)) return '⛵ rowboat across + ' + wKas + ' min → Kasbah';
+    if (wKas > 32) return '🚕 ~' + Math.max(6, Math.round(kKas * 3)) + ' min by taxi → Kasbah';
+    return '🚶 ' + wKas + ' min → Kasbah · ' + wHas + ' min → Hassan Tower';
+  }
   R.pois.filter(function (p) { return p.type === 'stay'; }).forEach(function (s) {
     var d = document.createElement('article');
     d.className = 'rb-stay-card reveal' + (s.pick ? ' is-pick' : '');
@@ -187,6 +203,7 @@
       '<span class="rb-stay-card__price">' + s.price + '<small>' + perNight(s.price) + '</small></span></div>' +
       '<h3 class="rb-stay-card__name">' + s.name + '</h3>' +
       '<p class="rb-stay-card__area">' + s.area + '</p>' +
+      '<p class="rb-stay-card__dist" title="Straight-line estimate from real coordinates">' + distLine(s) + '</p>' +
       '<div class="rb-stay-card__rating">' +
         '<span class="rb-stay-card__badge">' + s.rating.score.toFixed(1) + (isBooking ? '' : '★') + '</span>' +
         '<span>' + (s.rating.count ? s.rating.count.toLocaleString('en') + ' reviews · ' : '') + s.rating.src + '</span>' +

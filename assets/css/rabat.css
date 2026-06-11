@@ -649,6 +649,14 @@
 .rb-stay-card__price { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; color: var(--gold-soft); white-space: nowrap; }
 .rb-stay-card__name { font-family: var(--serif); font-weight: 580; font-size: 1.55rem; line-height: 1.05; }
 .rb-stay-card__area { font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(247, 241, 227, 0.55); }
+.rb-stay-card__dist {
+  font-size: 0.76rem;
+  color: var(--mint);
+  background: rgba(47, 191, 154, 0.08);
+  border-radius: 9px;
+  padding: 6px 10px;
+  width: fit-content;
+}
 .rb-stay-card__rating { display: flex; align-items: center; gap: 9px; font-size: 0.85rem; }
 .rb-stay-card__badge {
   background: var(--gold);
