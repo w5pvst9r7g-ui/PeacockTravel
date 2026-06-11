@@ -9,14 +9,18 @@ A fully self-contained static site for planning the Peacock family's trips.
 - **`rabat.html`** — the Rabat 2026 trip (Fri 19 → Mon 22 Jun, FR 162/163, booking H7M9XX):
   - day-by-day itinerary with per-stop icons, clickable mini-map route thumbnails,
     Google Maps links on every stop, and a live countdown chip in the hero
-  - custom interactive SVG map of Rabat & Salé, projected from real coordinates:
-    day routes with a synced stop manifest, restaurant/stay/sight layers,
-    pan/zoom/pinch, photo detail cards, ONCF railway to Casablanca, Morocco inset
+  - real-geography interactive map: grey OpenStreetMap basemap (CARTO Positron,
+    vendored Leaflet) with a Paper/Night style toggle, marker clustering, day
+    routes with numbered stops and a synced manifest, photo detail cards,
+    medina/kasbah district tints, the ONCF railway to Casablanca, find-us
+    geolocation, designed fallback tiles, lazy boot, and shareable deep links
+    (#poi=…, #day=…)
   - the table list — verified Google ratings (honest flags below the 4.5★ bar)
     with old-town/centre/south, kid-wins and cheap-eats filters
-  - stay options with live Booking.com pricing, computed walk/taxi times to the
-    Kasbah and Hassan Tower, a front-runner pick, and booking + Google links
-  - Friday Casablanca plan (train + Hassan II Mosque tour), neighbourhood guide,
+  - stay options with live Booking.com pricing, computed walk/taxi times, a
+    sortable comparison table, a front-runner pick, and booking + Google links
+  - trip-time awareness (countdown, today's chapter, auto day-select mid-trip),
+    a print-ready paper trip sheet, Friday Casablanca plan, neighbourhood guide,
     practical facts; licensed Wikimedia photography layered into the illustrated hero
 
 ## Running
