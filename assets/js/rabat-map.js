@@ -191,7 +191,16 @@ window.RabatMap = (function () {
         '<a class="mc-book" href="https://www.google.com/maps/search/?api=1&query=' +
           encodeURIComponent(poi.type === 'transit' ? poi.lat + ',' + poi.lng : poi.name + ', Rabat') +
           '" target="_blank" rel="noopener">Google Maps ↗</a>' +
+        '<button class="mc-book mc-copy" type="button">🔗 Copy link</button>' +
       '</div>';
+    if (window.history && history.replaceState) history.replaceState(null, '', '#poi=' + id);
+    var copyBtn = cardBody.querySelector('.mc-copy');
+    copyBtn.addEventListener('click', function () {
+      var url = location.origin + location.pathname + '#poi=' + id;
+      var done = function () { copyBtn.textContent = '✓ Copied'; setTimeout(function () { copyBtn.textContent = '🔗 Copy link'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
+      else done();
+    });
     if (poi.img) {
       var ph = cardBody.querySelector('.mc-photo');
       var im = ph.querySelector('img');
@@ -248,6 +257,7 @@ window.RabatMap = (function () {
 
   function setDay(d, fly) {
     activeDay = d;
+    if (window.history && history.replaceState) history.replaceState(null, '', d === 'all' ? location.pathname : '#day=' + d);
     if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
     if (numsLayer) { map.removeLayer(numsLayer); numsLayer = null; }
     document.querySelectorAll('.rb-map__tab').forEach(function (b) {

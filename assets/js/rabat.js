@@ -294,6 +294,21 @@
   /* ---------------- map ---------------- */
   if (window.RabatMap) window.RabatMap.init();
 
+  /* deep links: #poi=<id> opens a card, #day=<n> traces a day */
+  function applyHash() {
+    var h = location.hash;
+    var mPoi = h.match(/^#poi=([\w-]+)$/);
+    var mDay = h.match(/^#day=([1-4])$/);
+    if (!mPoi && !mDay) return;
+    setTimeout(function () {
+      document.getElementById('map').scrollIntoView({ behavior: 'auto', block: 'start' });
+      if (mPoi) window.RabatMap.focusPoi(mPoi[1]);
+      else window.RabatMap.setDay(+mDay[1]);
+    }, 600);
+  }
+  window.addEventListener('hashchange', applyHash);
+  applyHash();
+
   /* "⌖ map" buttons — fly the map to the poi */
   document.addEventListener('click', function (e) {
     var dayBtn = e.target.closest('[data-setday]');
@@ -314,7 +329,9 @@
   if (!window.gsap || prefersReduced) return;
   gsap.registerPlugin(ScrollTrigger);
 
-  /* intro curtain */
+  /* intro curtain (skipped when arriving on a shared deep link) */
+  var deepLinked = /^#(poi|day)=/.test(location.hash);
+  if (!deepLinked) {
   var curtain = document.createElement('div');
   curtain.className = 'rb-curtain';
   curtain.setAttribute('aria-hidden', 'true');
@@ -333,10 +350,11 @@
       yPercent: -100, duration: 0.75, ease: 'power4.inOut', delay: 0.35,
       onStart: function () { document.body.style.overflow = ''; }
     });
+  }
 
   /* hero letters + chips */
-  gsap.from('.rb-hero__title span', { yPercent: 60, opacity: 0, duration: 1.1, ease: 'power4.out', stagger: 0.07, delay: 1.45 });
-  gsap.from('.rb-hero__kicker, .rb-hero__arabic, .rb-hero__chips .rb-chip', { y: 24, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07, delay: 1.8 });
+  gsap.from('.rb-hero__title span', { yPercent: 60, opacity: 0, duration: 1.1, ease: 'power4.out', stagger: 0.07, delay: deepLinked ? 0.1 : 1.45 });
+  gsap.from('.rb-hero__kicker, .rb-hero__arabic, .rb-hero__chips .rb-chip', { y: 24, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07, delay: deepLinked ? 0.3 : 1.8 });
 
   /* pointer parallax on the hero scene (desktop) */
   if (window.matchMedia('(pointer: fine)').matches) {
