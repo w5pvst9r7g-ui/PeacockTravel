@@ -71,6 +71,30 @@
     return '<a class="' + cls + '" href="' + href + '" target="_blank" rel="noopener">Google ↗</a>';
   }
 
+  /* ---------------- live countdown chip ---------------- */
+  (function () {
+    var chips = document.querySelector('.rb-hero__chips');
+    if (!chips) return;
+    var dep = new Date('2026-06-19T07:55:00+01:00');
+    var ret = new Date('2026-06-22T15:05:00+01:00');
+    var now = new Date();
+    var dayMs = 86400000;
+    var txt;
+    if (now < dep) {
+      var d = Math.ceil((dep - now) / dayMs);
+      txt = d <= 1 ? '🛫 Boarding day — pack the bags!' : '🛫 T-minus ' + d + ' days';
+    } else if (now <= ret) {
+      var n = Math.floor((now - dep) / dayMs) + 1;
+      txt = '🌞 Day ' + n + ' — we’re in Morocco';
+    } else {
+      txt = '🏡 Home with stories';
+    }
+    var chip = document.createElement('span');
+    chip.className = 'rb-chip rb-chip--live';
+    chip.textContent = txt;
+    chips.appendChild(chip);
+  })();
+
   /* ---------------- render: itinerary ---------------- */
   var rail = document.getElementById('days-rail');
   R.days.forEach(function (day) {

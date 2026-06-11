@@ -97,6 +97,7 @@
   white-space: nowrap;
 }
 .rb-chip b { color: var(--gold-soft); font-weight: 600; }
+.rb-chip--live { background: var(--gold); color: var(--night); border-color: var(--gold); font-weight: 700; }
 .rb-hero__scroll {
   position: absolute;
   right: var(--gutter);
