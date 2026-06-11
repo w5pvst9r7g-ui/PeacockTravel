@@ -1179,3 +1179,15 @@ section[id] { scroll-margin-top: 64px; }
 .rb-stay-table a { color: var(--gold-soft); font-weight: 600; font-size: 0.78rem; text-decoration: none; }
 .rb-stay-table a:hover { text-decoration: underline; }
 @media print { .rb-stay__toggle, .rb-stay__tablewrap { display: none !important; } }
+
+/* find-us location dot */
+#map-locate.is-busy { animation: pulse 1s infinite; }
+.lf-here span {
+  display: block;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #2b4bd8;
+  border: 3px solid #fffdf6;
+  box-shadow: 0 0 0 0 rgba(43, 75, 216, 0.45);
+  animation: pulse 2.2s infinite;
+}

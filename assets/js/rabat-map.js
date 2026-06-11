@@ -382,6 +382,31 @@ window.RabatMap = (function () {
     drawMarkers(window.RABAT.pois);
     drawInset();
 
+    /* find-us: live location while on the ground in Rabat */
+    var locBtn = document.createElement('button');
+    locBtn.id = 'map-locate';
+    locBtn.setAttribute('aria-label', 'Show our location');
+    locBtn.textContent = '📍';
+    document.querySelector('.rb-map__zoom').appendChild(locBtn);
+    var locLayer = null;
+    locBtn.addEventListener('click', function () {
+      locBtn.classList.add('is-busy');
+      map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true, timeout: 8000 });
+    });
+    map.on('locationfound', function (e) {
+      locBtn.classList.remove('is-busy');
+      if (locLayer) map.removeLayer(locLayer);
+      locLayer = L.layerGroup([
+        L.circle(e.latlng, { radius: e.accuracy / 2, color: '#2b4bd8', weight: 1, fillOpacity: 0.08 }),
+        L.marker(e.latlng, { icon: L.divIcon({ className: 'lf-here', html: '<span></span>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false })
+      ]).addTo(map);
+    });
+    map.on('locationerror', function () {
+      locBtn.classList.remove('is-busy');
+      locBtn.textContent = '✕';
+      setTimeout(function () { locBtn.textContent = '📍'; }, 1600);
+    });
+
     document.getElementById('zoom-in').addEventListener('click', function () { map.zoomIn(); });
     document.getElementById('zoom-out').addEventListener('click', function () { map.zoomOut(); });
     document.getElementById('zoom-reset').addEventListener('click', function () { closeCard(); setDay('all'); });
