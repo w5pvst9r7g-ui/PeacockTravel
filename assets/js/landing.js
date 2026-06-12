@@ -49,6 +49,7 @@
 
   var DUB = { lat: 53.3498, lng: -6.2603 };
   var RBA = { lat: 34.0209, lng: -6.8417 };
+  var MIL = { lat: 45.4642, lng: 9.1900 };
 
   var renderer;
   try {
@@ -95,7 +96,8 @@
     pos[i * 3] = v.x; pos[i * 3 + 1] = v.y; pos[i * 3 + 2] = v.z;
     var nearRoute =
       (Math.abs(dots[i][0] - DUB.lat) < 4 && Math.abs(dots[i][1] - DUB.lng) < 6) ||
-      (Math.abs(dots[i][0] - RBA.lat) < 4 && Math.abs(dots[i][1] - RBA.lng) < 6);
+      (Math.abs(dots[i][0] - RBA.lat) < 4 && Math.abs(dots[i][1] - RBA.lng) < 6) ||
+      (Math.abs(dots[i][0] - MIL.lat) < 3 && Math.abs(dots[i][1] - MIL.lng) < 4);
     c = nearRoute ? cGold : (Math.random() > 0.5 ? cBase : cAlt);
     col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
   }
@@ -137,6 +139,20 @@
   arcLine.geometry.setDrawRange(0, prefersReduced ? SEG + 1 : 0);
   globe.add(arcLine);
 
+  /* second arc: Dublin → Milano */
+  var m3 = latLngToVec3(MIL.lat, MIL.lng, 1);
+  var arcPts2 = [];
+  for (i = 0; i <= SEG; i++) {
+    var t2 = i / SEG;
+    var p2 = new THREE.Vector3().copy(a3).lerp(m3, t2).normalize();
+    p2.multiplyScalar(1 + 0.14 * Math.sin(Math.PI * t2));
+    arcPts2.push(p2);
+  }
+  var arcGeo2 = new THREE.BufferGeometry().setFromPoints(arcPts2);
+  var arcLine2 = new THREE.Line(arcGeo2, new THREE.LineBasicMaterial({ color: 0x43d6ad, transparent: true, opacity: 0.85 }));
+  arcLine2.geometry.setDrawRange(0, prefersReduced ? SEG + 1 : 0);
+  globe.add(arcLine2);
+
   /* endpoint markers */
   function makeMarker(at, color, size) {
     var m = new THREE.Mesh(
@@ -149,6 +165,7 @@
   }
   makeMarker(a3, 0xf7f1e3, 0.014);
   makeMarker(b3, 0xd9a441, 0.02);
+  makeMarker(m3, 0x43d6ad, 0.017);
 
   /* plane dot travelling the arc */
   var plane = new THREE.Mesh(
@@ -201,6 +218,7 @@
   var hero = document.querySelector('.hero');
   var pinDub = document.getElementById('pin-dub');
   var pinRba = document.getElementById('pin-rba');
+  var pinMil = document.getElementById('pin-mil');
   var pinWorld = new THREE.Vector3();
   var camDir = new THREE.Vector3();
 
@@ -260,6 +278,8 @@
     /* arc draw */
     var arcFrac = prefersReduced ? 1 : Math.min(1, Math.max(0, (el - ARC_DELAY) / (INTRO_MS - 400)));
     arcLine.geometry.setDrawRange(0, Math.floor(easeOut(arcFrac) * SEG) + 1);
+    var arcFrac2 = prefersReduced ? 1 : Math.min(1, Math.max(0, (el - ARC_DELAY - 900) / (INTRO_MS - 400)));
+    arcLine2.geometry.setDrawRange(0, Math.floor(easeOut(arcFrac2) * SEG) + 1);
 
     /* plane shuttles along the arc after intro */
     var pt;
@@ -285,6 +305,7 @@
 
     placePin(pinDub, a3, arcFrac > 0.05 ? 1 : 0);
     placePin(pinRba, b3, arcFrac > 0.92 ? 1 : 0);
+    placePin(pinMil, m3, arcFrac2 > 0.92 ? 1 : 0);
 
     renderer.render(scene, camera);
   }
