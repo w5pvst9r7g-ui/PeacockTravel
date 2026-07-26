@@ -1,0 +1,5 @@
+# dev-tool artifacts (the published site is everything else in the repo)
+tools/node_modules/
+tools/shots/
+tools/land-dots.json
+.DS_Store

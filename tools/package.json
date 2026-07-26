@@ -1,0 +1,19 @@
+{
+  "name": "peacock-travel-tools",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only tools for the Peacock Travel site: headless-Chrome verification harness (shoot/probe) and geo-data generators. Not part of the published site.",
+  "scripts": {
+    "shoot": "node shoot.mjs",
+    "probe": "node probe.mjs"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.1",
+    "puppeteer-core": "^23.11.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  },
+  "optionalDependencies": {
+    "@sparticuz/chromium": "^131.0.1"
+  }
+}

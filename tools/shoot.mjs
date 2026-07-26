@@ -1,35 +1,19 @@
-/* Screenshot + console-error harness (run from tools/: node shoot.mjs <page> <out-prefix>) */
-import chromium from '/tmp/vendor/node_modules/@sparticuz/chromium/build/index.js';
-import puppeteer from '/tmp/vendor/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
-import { createServer } from 'http';
-import { readFile } from 'fs/promises';
-import { extname, join } from 'path';
-
-const ROOT = new URL('..', import.meta.url).pathname;
-const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg' };
-
-const server = createServer(async (req, res) => {
-  try {
-    const path = req.url.split('?')[0];
-    const file = join(ROOT, path === '/' ? 'index.html' : path);
-    const data = await readFile(file);
-    res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream' });
-    res.end(data);
-  } catch {
-    res.writeHead(404); res.end('nope');
-  }
-});
-await new Promise(r => server.listen(8377, r));
+/* Screenshot + console-error harness.
+   Usage (from repo root or tools/):  node tools/shoot.mjs <page.html> <out-prefix>
+   Captures hero + fullPage at 1440px and 390px into tools/shots/, reports console
+   errors / pageerrors / failed requests / horizontal overflow. Sandbox cert noise
+   (wikimedia, cartocdn) is listed separately and doesn't count as a failure. */
+import { launchBrowser, serveRepo, shotPath, isSandboxNoise, sleep } from './lib/harness.mjs';
 
 const page_ = process.argv[2] || 'index.html';
 const prefix = process.argv[3] || 'shot';
-const browser = await puppeteer.launch({
-  args: [...chromium.args, '--no-sandbox', '--enable-webgl', '--use-gl=angle'],
-  executablePath: await chromium.executablePath(),
-  headless: 'shell',
-});
+
+const server = await serveRepo(8377);
+const browser = await launchBrowser(['--enable-webgl', '--use-gl=angle']);
 
 const errors = [];
+const noise = [];
+const push = m => (isSandboxNoise(m) ? noise : errors).push(m);
 const viewports = [
   { name: 'desktop', width: 1440, height: 900, dsf: 1 },
   { name: 'mobile', width: 390, height: 844, dsf: 2, mobile: true },
@@ -37,13 +21,13 @@ const viewports = [
 
 for (const vp of viewports) {
   const page = await browser.newPage();
-  page.on('console', m => { if (m.type() === 'error') errors.push(`[${vp.name}] console: ${m.text()}`); });
-  page.on('pageerror', e => errors.push(`[${vp.name}] pageerror: ${e.message}`));
-  page.on('requestfailed', r => errors.push(`[${vp.name}] reqfail: ${r.url()} ${r.failure()?.errorText}`));
+  page.on('console', m => { if (m.type() === 'error') push(`[${vp.name}] console: ${m.text()}`); });
+  page.on('pageerror', e => push(`[${vp.name}] pageerror: ${e.message}`));
+  page.on('requestfailed', r => push(`[${vp.name}] reqfail: ${r.url()} ${r.failure()?.errorText}`));
   await page.setViewport({ width: vp.width, height: vp.height, deviceScaleFactor: vp.dsf, isMobile: !!vp.mobile, hasTouch: !!vp.mobile });
-  await page.goto(`http://127.0.0.1:8377/${page_}`, { waitUntil: 'networkidle0', timeout: 30000 });
-  await new Promise(r => setTimeout(r, 3200));
-  await page.screenshot({ path: `/tmp/${prefix}-${vp.name}-hero.png` });
+  await page.goto(`http://127.0.0.1:8377/${page_}`, { waitUntil: 'networkidle0', timeout: 30000 }).catch(e => push(`[${vp.name}] goto: ${e.message}`));
+  await sleep(3200);
+  await page.screenshot({ path: shotPath(`${prefix}-${vp.name}-hero.png`) });
   // scroll through the page like a user so scroll-triggered animations fire
   await page.evaluate(async () => {
     const h = document.documentElement.scrollHeight;
@@ -53,11 +37,11 @@ for (const vp of viewports) {
     }
     window.scrollTo(0, h);
   });
-  await new Promise(r => setTimeout(r, 1200));
+  await sleep(1200);
   await page.evaluate(() => window.scrollTo(0, 0));
-  await new Promise(r => setTimeout(r, 600));
-  // full page
-  await page.screenshot({ path: `/tmp/${prefix}-${vp.name}-full.png`, fullPage: true });
+  await sleep(600);
+  // full page (100svh heroes distort here — per-viewport shots are authoritative)
+  await page.screenshot({ path: shotPath(`${prefix}-${vp.name}-full.png`), fullPage: true });
   // horizontal overflow check
   const overflow = await page.evaluate(() => {
     const d = document.documentElement;
@@ -75,6 +59,8 @@ for (const vp of viewports) {
   await page.close();
 }
 
+if (noise.length) console.log(`(sandbox noise: ${noise.length} cert-blocked requests — expected)`);
 console.log(errors.length ? 'ISSUES:\n' + errors.join('\n') : 'CLEAN — no console errors, no failed requests, no overflow');
 await browser.close();
 server.close();
+process.exit(errors.length ? 1 : 0);
