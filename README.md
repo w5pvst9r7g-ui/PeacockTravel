@@ -2,10 +2,21 @@
 
 A fully self-contained static site for planning the Peacock family's trips.
 
+**Live:** https://w5pvst9r7g-ui.github.io/PeacockTravel/ — every push to the working branch
+auto-deploys via GitHub Actions.
+
+**Project knowledge base:** `CLAUDE.md` (session memory) + `docs/` — architecture, the
+new-trip playbook, research/licensing standards, operations & gotchas, and the live trip log.
+
 ## Pages
 
 - **`index.html`** — landing page: an interactive 3D dotted globe (Three.js) tracing the
-  Dublin → Rabat flight arc, the departures board of upcoming trips, and the family crew.
+  Dublin → Rabat and Dublin → Milano flight arcs, the departures board of upcoming trips,
+  and the family crew.
+- **`milan.html`** — Milano 2026 (Thu 9 → Sun 12 Jul, FR7799/FR4845, booking A567VA): first
+  family trip to Italy — Duomo-rooftop morning, Lake Como Saturday, Bergamo Città Alta
+  finale, Last Supper booking playbook, live-priced family stays, all on the same live-map
+  engine as Rabat.
 - **`rabat.html`** — the Rabat 2026 trip (Fri 19 → Mon 22 Jun, FR 162/163, booking H7M9XX):
   - day-by-day itinerary with per-stop icons, clickable mini-map route thumbnails,
     Google Maps links on every stop, and a live countdown chip in the hero
