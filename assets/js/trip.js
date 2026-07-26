@@ -1,9 +1,19 @@
-/* Peacock Travel — Milan page logic (same template as the Rabat page) */
+/* Peacock Travel — shared trip-page logic (all trip pages)
+   Everything trip-specific lives in the data file under window.TRIP.meta:
+     city                — Google-Maps query suffix for pois without their own `city`
+     inPlace             — mid-trip countdown-chip wording ("we're in Italia")
+     curtain {word, sub} — intro curtain
+     dep / ret / tz      — flight datetimes (ISO, with offsets) + destination UTC offset
+     dayDates[]          — one calendar date per itinerary day
+     nights              — for per-night maths + the compare-table header
+     stayDist            — walk anchors, far-mode (taxi/metro) rules, special cases
+     eatBuckets[]        — area filter chips {key, label, re?, default?}   */
 (function () {
   'use strict';
 
   var R = window.TRIP;
-  if (!R) return;
+  if (!R || !R.meta) return;
+  var M = R.meta;
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------------- nav ---------------- */
@@ -65,34 +75,44 @@
   }
   function gmapsForPoi(p) {
     /* generic transit spots resolve better by coordinates; named venues by name */
-    var q = (p.type === 'transit') ? (p.lat + ',' + p.lng) : (p.name + ', ' + (p.city || 'Milan'));
+    var q = (p.type === 'transit') ? (p.lat + ',' + p.lng) : (p.name + ', ' + (p.city || M.city));
     return gmapsUrl(q);
   }
   function gLink(href, cls) {
     return '<a class="' + cls + '" href="' + href + '" target="_blank" rel="noopener">Google ↗</a>';
   }
 
-  /* ---------------- trip clock (override with window.__RB_NOW for tests) ---------------- */
-  function tripNow() { return window.__RB_NOW ? new Date(window.__RB_NOW) : new Date(); }
-  var DEP = new Date('2026-07-09T19:20:00+01:00');
-  var RET = new Date('2026-07-12T19:00:00+01:00');
-  function dayStart(n) { return new Date('2026-07-' + ('0' + (8 + n)).slice(-2) + 'T00:00:00+02:00'); }
-  function dayEnd(n) { return new Date('2026-07-' + ('0' + (8 + n)).slice(-2) + 'T23:59:59+02:00'); }
+  /* ---------------- trip clock (override with window.__TRIP_NOW for tests) ---------------- */
+  function tripNow() {
+    var t = window.__TRIP_NOW || window.__RB_NOW; /* legacy test-hook name */
+    return t ? new Date(t) : new Date();
+  }
+  var DEP = new Date(M.dep);
+  var RET = new Date(M.ret);
+  var DAYS_N = R.days.length;
+  function dayStart(n) { return new Date(M.dayDates[n - 1] + 'T00:00:00' + M.tz); }
+  function dayEnd(n) { return new Date(M.dayDates[n - 1] + 'T23:59:59' + M.tz); }
+  function calendarDay(now) {
+    for (var n = 1; n <= DAYS_N; n++) {
+      if (now >= dayStart(n) && now <= dayEnd(n)) return n;
+    }
+    return null;
+  }
 
   /* ---------------- live countdown chip ---------------- */
   (function () {
     var chips = document.querySelector('.rb-hero__chips');
     if (!chips) return;
-    var dep = DEP, ret = RET;
     var now = tripNow();
     var dayMs = 86400000;
     var txt;
-    if (now < dep) {
-      var d = Math.ceil((dep - now) / dayMs);
+    if (now < DEP) {
+      var d = Math.ceil((DEP - now) / dayMs);
       txt = d <= 1 ? '🛫 Boarding day — pack the bags!' : '🛫 T-minus ' + d + ' days';
-    } else if (now <= ret) {
-      var n = Math.floor((now - dep) / dayMs) + 1;
-      txt = '🌞 Day ' + n + ' — we’re in Italia';
+    } else if (now <= RET) {
+      /* calendar day, so the chip agrees with the itinerary's "today" tag */
+      var n = calendarDay(now) || Math.floor((now - DEP) / dayMs) + 1;
+      txt = '🌞 Day ' + n + ' — ' + M.inPlace;
     } else {
       txt = '🏡 Home with stories';
     }
@@ -132,7 +152,7 @@
         '<span class="rb-stop__note">' + s.note + '</span>' +
         '</li>';
     }).join('');
-    var thumb = (window.MilanMap && window.MilanMap.thumb) ? window.MilanMap.thumb(day.n) : '';
+    var thumb = (window.TripMap && window.TripMap.thumb) ? window.TripMap.thumb(day.n) : '';
     var now = tripNow();
     var tag = '';
     if (now > dayEnd(day.n)) { art.classList.add('is-past'); tag = '<span class="rb-day__tag rb-day__tag--past">✓ done</span>'; }
@@ -152,19 +172,21 @@
 
   /* ---------------- render: eat list ---------------- */
   var eatList = document.getElementById('eat-list');
+  var defaultBucket = 'all';
+  M.eatBuckets.forEach(function (b) { if (b.default) defaultBucket = b.key; });
   function eatBucket(area) {
-    if (/Navigli|Ticinese|Darsena/i.test(area)) return 'navigli';
-    if (/Brera|Isola|Porta Nuova|Centrale|Buenos Aires|Garibaldi/i.test(area)) return 'north';
-    return 'centro';
+    for (var i = 0; i < M.eatBuckets.length; i++) {
+      var b = M.eatBuckets[i];
+      if (b.re && new RegExp(b.re, 'i').test(area)) return b.key;
+    }
+    return defaultBucket;
   }
   /* filter chips */
   var chipsBar = document.createElement('div');
   chipsBar.className = 'rb-eat__chips';
   chipsBar.innerHTML =
     '<button class="is-on" data-f="all">All tables</button>' +
-    '<button data-f="centro">Centro</button>' +
-    '<button data-f="north">Brera &amp; north</button>' +
-    '<button data-f="navigli">Navigli</button>' +
+    M.eatBuckets.map(function (b) { return '<button data-f="' + b.key + '">' + b.label + '</button>'; }).join('') +
     '<button data-f="kid">Kid wins</button>' +
     '<button data-f="cheap">€ cheap eats</button>';
   eatList.parentNode.insertBefore(chipsBar, eatList);
@@ -241,24 +263,34 @@
   function perNight(price) {
     var m = price.match(/(\d[\d,]*)\s*(?:–\s*(\d[\d,]*))?/);
     if (!m) return '';
-    var a = Math.round(parseInt(m[1].replace(/,/g, ''), 10) / 3);
-    var b = m[2] ? Math.round(parseInt(m[2].replace(/,/g, ''), 10) / 3) : null;
+    var a = Math.round(parseInt(m[1].replace(/,/g, ''), 10) / M.nights);
+    var b = m[2] ? Math.round(parseInt(m[2].replace(/,/g, ''), 10) / M.nights) : null;
     return '≈ €' + a + (b ? '–' + b : '') + ' a night';
   }
-  /* distance context: walking/taxi time from each stay to the anchors */
+  /* distance context: walking/taxi/metro time from each stay to the anchors */
   function km(aLat, aLng, bLat, bLng) {
     var dy = (bLat - aLat) * 110.57;
-    var dx = (bLng - aLng) * 111.32 * Math.cos(34.02 * Math.PI / 180);
+    var dx = (bLng - aLng) * 111.32 * Math.cos(R.map.thumb.refLat * Math.PI / 180);
     return Math.sqrt(dx * dx + dy * dy);
   }
-  var DUOMO = [45.4642, 9.1900], CASTELLO = [45.4703, 9.1796];
+  var SD = M.stayDist;
+  var A0 = SD.anchors[0], A1 = SD.anchors[1];
+  function findSpecial(s) {
+    var list = SD.special || [];
+    for (var i = 0; i < list.length; i++) {
+      if (new RegExp(list[i].re).test(s.area)) return list[i];
+    }
+    return null;
+  }
+  function farMin(k) { return Math.max(SD.far.minMin, Math.round(k * SD.far.perKmMin)); }
   function distLine(s) {
-    var kDu = km(s.lat, s.lng, DUOMO[0], DUOMO[1]);
-    var kCa = km(s.lat, s.lng, CASTELLO[0], CASTELLO[1]);
-    var wDu = Math.max(2, Math.round(kDu * 13));
-    var wCa = Math.max(2, Math.round(kCa * 13));
-    if (wDu > 32) return '🚇 ~' + Math.max(8, Math.round(kDu * 5)) + ' min by metro → Duomo';
-    return '🚶 ' + wDu + ' min → Duomo · ' + wCa + ' min → Castello';
+    var k0 = km(s.lat, s.lng, A0.lat, A0.lng);
+    var w0 = Math.max(2, Math.round(k0 * 13));
+    var sp = findSpecial(s);
+    if (sp) return sp.template.replace('{min}', w0);
+    if (w0 > 32) return SD.far.emoji + ' ~' + farMin(k0) + ' min ' + SD.far.label + ' → ' + A0.label;
+    var w1 = Math.max(2, Math.round(km(s.lat, s.lng, A1.lat, A1.lng) * 13));
+    return '🚶 ' + w0 + ' min → ' + A0.label + ' · ' + w1 + ' min → ' + A1.label;
   }
   /* comparison table + view toggle */
   (function () {
@@ -268,19 +300,25 @@
     wrap.className = 'rb-stay__tablewrap';
     wrap.hidden = true;
     function num(str) { var m = String(str).match(/\d[\d,]*/); return m ? parseInt(m[0].replace(/,/g, ''), 10) : 0; }
-    function walkMin(s) { return Math.round(km(s.lat, s.lng, DUOMO[0], DUOMO[1]) * 13); }
+    function walkMin(s) { return Math.round(km(s.lat, s.lng, A0.lat, A0.lng) * 13); }
     var rows = stays.map(function (s) {
       return { s: s, price: num(s.price), score: s.rating.score, walk: walkMin(s) };
     });
     var sortKey = 'price', sortDir = 1;
+    function walkCell(r) {
+      var sp = findSpecial(r.s);
+      if (sp && sp.short) return sp.short.replace('{min}', r.walk);
+      if (r.walk > 32) return SD.far.emoji + ' ~' + farMin(r.walk / 13) + ' min';
+      return '🚶 ' + r.walk + ' min';
+    }
     function render() {
       rows.sort(function (a, b) { return (a[sortKey] - b[sortKey]) * sortDir; });
       var arrow = sortDir === 1 ? ' ↑' : ' ↓';
       wrap.innerHTML = '<table class="rb-stay-table"><thead><tr>' +
         '<th>Stay</th><th>Style · area</th>' +
         '<th class="is-sort" data-k="score">Score' + (sortKey === 'score' ? arrow : '') + '</th>' +
-        '<th class="is-sort" data-k="price">3 nights' + (sortKey === 'price' ? arrow : '') + '</th>' +
-        '<th class="is-sort" data-k="walk">Walk → Duomo' + (sortKey === 'walk' ? arrow : '') + '</th>' +
+        '<th class="is-sort" data-k="price">' + M.nights + ' nights' + (sortKey === 'price' ? arrow : '') + '</th>' +
+        '<th class="is-sort" data-k="walk">Walk → ' + A0.label + (sortKey === 'walk' ? arrow : '') + '</th>' +
         '<th></th></tr></thead><tbody>' +
         rows.map(function (r) {
           var s = r.s;
@@ -289,7 +327,7 @@
             '<td>' + s.style + '<small>' + s.area + '</small></td>' +
             '<td><b>' + s.rating.score.toFixed(1) + '</b><small>' + (s.rating.count ? s.rating.count.toLocaleString('en') + ' · ' : '') + s.rating.src + '</small></td>' +
             '<td><b>' + s.price.split('·')[0].trim() + '</b><small>' + perNight(s.price) + '</small></td>' +
-            '<td>' + (r.walk > 32 ? '🚇 ~' + Math.max(8, Math.round(r.walk / 13 * 5)) + ' min' : '🚶 ' + r.walk + ' min') + '</td>' +
+            '<td>' + walkCell(r) + '</td>' +
             '<td><a href="' + s.book + '" target="_blank" rel="noopener">Book ↗</a></td></tr>';
         }).join('') + '</tbody></table>';
       wrap.querySelectorAll('.is-sort').forEach(function (th) {
@@ -362,6 +400,7 @@
   /* ---------------- dining arch photo (progressive) ---------------- */
   var eatPhoto = document.getElementById('eat-photo');
   if (eatPhoto && R.eatPhoto) {
+    if (R.eatPhoto.alt) eatPhoto.alt = R.eatPhoto.alt;
     eatPhoto.addEventListener('load', function () {
       document.getElementById('eat-arch').classList.add('is-loaded');
       var cred = document.getElementById('eat-credit');
@@ -371,7 +410,7 @@
   }
 
   /* ---------------- map (lazy: boots when the section approaches) ---------------- */
-  function ensureMap() { if (window.MilanMap) window.MilanMap.init(); }
+  function ensureMap() { if (window.TripMap) window.TripMap.init(); }
   (function () {
     var sec = document.getElementById('map');
     if (!sec) return;
@@ -387,26 +426,23 @@
   (function () {
     if (/^#(poi|day)=/.test(location.hash)) return;
     var now = tripNow();
-    if (now < dayStart(1) || now > dayEnd(4)) return;
-    for (var n = 1; n <= 4; n++) {
-      if (now >= dayStart(n) && now <= dayEnd(n)) {
-        setTimeout(function () { ensureMap(); window.MilanMap && window.MilanMap.setDay(n, false); }, 400);
-        break;
-      }
-    }
+    if (now < dayStart(1) || now > dayEnd(DAYS_N)) return;
+    var n = calendarDay(now);
+    if (n) setTimeout(function () { ensureMap(); window.TripMap && window.TripMap.setDay(n, false); }, 400);
   })();
 
   /* deep links: #poi=<id> opens a card, #day=<n> traces a day */
   function applyHash() {
     var h = location.hash;
     var mPoi = h.match(/^#poi=([\w-]+)$/);
-    var mDay = h.match(/^#day=([1-4])$/);
+    var mDay = h.match(/^#day=(\d+)$/);
+    if (mDay && (+mDay[1] < 1 || +mDay[1] > DAYS_N)) mDay = null;
     if (!mPoi && !mDay) return;
     ensureMap();
     setTimeout(function () {
       document.getElementById('map').scrollIntoView({ behavior: 'auto', block: 'start' });
-      if (mPoi) window.MilanMap.focusPoi(mPoi[1]);
-      else window.MilanMap.setDay(+mDay[1]);
+      if (mPoi) window.TripMap.focusPoi(mPoi[1]);
+      else window.TripMap.setDay(+mDay[1]);
     }, 600);
   }
   window.addEventListener('hashchange', applyHash);
@@ -418,7 +454,7 @@
     if (dayBtn) {
       ensureMap();
       document.getElementById('map').scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
-      setTimeout(function () { window.MilanMap && window.MilanMap.setDay(+dayBtn.getAttribute('data-setday')); }, prefersReduced ? 80 : 650);
+      setTimeout(function () { window.TripMap && window.TripMap.setDay(+dayBtn.getAttribute('data-setday')); }, prefersReduced ? 80 : 650);
       return;
     }
     var btn = e.target.closest('[data-poi]');
@@ -427,7 +463,7 @@
     var id = btn.getAttribute('data-poi');
     document.getElementById('map').scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
     var delay = prefersReduced ? 80 : 650;
-    setTimeout(function () { window.MilanMap && window.MilanMap.focusPoi(id); }, delay);
+    setTimeout(function () { window.TripMap && window.TripMap.focusPoi(id); }, delay);
   });
 
   /* ---------------- animations ---------------- */
@@ -443,8 +479,8 @@
   curtain.innerHTML =
     '<div class="rb-curtain__inner">' +
       '<svg class="rb-curtain__star" viewBox="0 0 64 64"><rect x="14" y="14" width="36" height="36" fill="none" stroke="#d9a441" stroke-width="2"/><rect x="14" y="14" width="36" height="36" fill="none" stroke="#d9a441" stroke-width="2" transform="rotate(45 32 32)"/></svg>' +
-      '<p class="rb-curtain__word">Milano</p>' +
-      '<p class="rb-curtain__sub">Peacock Travel · Trip № 2 · Italia</p>' +
+      '<p class="rb-curtain__word">' + M.curtain.word + '</p>' +
+      '<p class="rb-curtain__sub">' + M.curtain.sub + '</p>' +
     '</div>';
   document.body.appendChild(curtain);
   document.body.style.overflow = 'hidden';

@@ -1,14 +1,21 @@
-/* Peacock Travel — Milan map (same engine as the Rabat page)
-   Real OpenStreetMap geography (grey CARTO Positron tiles via Leaflet),
-   with the family's own layer on top: shaped markers, day routes, district
-   tints and the railway to Casablanca. The stylised projection below is
-   kept for the itinerary's mini-map thumbnails. */
-window.MilanMap = (function () {
+/* Peacock Travel — shared trip-map engine (all trip pages)
+   Real OpenStreetMap geography (grey CARTO Positron tiles via Leaflet) with the
+   family's own layer on top: shaped markers, day routes, district tints, railways.
+   Everything city-specific lives in the trip's data file under window.TRIP.map:
+     home / homePortrait / maxBounds / minZoom — framing
+     inset { outlineGlobal, dot }             — country locator inset
+     thumb { bbox, refLat, lines }            — stylised mini-map thumbnails
+     geometry { polygons[], polylines[] }     — live-map overlays
+   The stylised projection below is kept for the itinerary's mini-map thumbnails. */
+window.TripMap = (function () {
   'use strict';
 
+  var CFG = window.TRIP && window.TRIP.map;
+  if (!CFG) return null;
+
   /* ---------- stylised projection (thumbnails only) ---------- */
-  var BBOX = { latMin: 45.400, latMax: 45.530, lngMin: 9.050, lngMax: 9.310 };
-  var KMX = 111.32 * Math.cos(45.46 * Math.PI / 180);
+  var BBOX = CFG.thumb.bbox;
+  var KMX = 111.32 * Math.cos(CFG.thumb.refLat * Math.PI / 180);
   var KMY = 110.57;
   var S = 52;
 
@@ -37,42 +44,6 @@ window.MilanMap = (function () {
     return d;
   }
 
-  /* stylised geometry for mini-map thumbnails + live overlays */
-  function ellipse(clat, clng, rlat, rlng, n) {
-    var out = [];
-    for (var i = 0; i < n; i++) {
-      var a = i / n * Math.PI * 2;
-      out.push([clat + Math.sin(a) * rlat, clng + Math.cos(a) * rlng]);
-    }
-    out.push(out[0].slice());
-    return out;
-  }
-  /* Cerchia dei Navigli — the medieval ring around the centro storico */
-  var RING = ellipse(45.4640, 9.1895, 0.0085, 0.0125, 20);
-  /* the two canals running out from the Darsena */
-  var NAV_GRANDE = [
-    [45.4520, 9.1700], [45.4480, 9.1620], [45.4440, 9.1520],
-    [45.4400, 9.1400], [45.4350, 9.1250], [45.4310, 9.1100]
-  ];
-  var NAV_PAVESE = [
-    [45.4520, 9.1715], [45.4470, 9.1735], [45.4390, 9.1750],
-    [45.4290, 9.1765], [45.4190, 9.1780]
-  ];
-  /* Parco Sempione behind the castle */
-  var SEMPIONE = [
-    [45.4795, 9.1690], [45.4790, 9.1790], [45.4745, 9.1815],
-    [45.4705, 9.1775], [45.4720, 9.1690], [45.4765, 9.1660]
-  ];
-  /* railways out to the two airports */
-  var RAIL_BGY = [
-    [45.4862, 9.2046], [45.4950, 9.2350], [45.5060, 9.2750], [45.5220, 9.3300],
-    [45.5520, 9.4300], [45.6000, 9.5400], [45.6500, 9.6400], [45.6896, 9.6750]
-  ];
-  var RAIL_MXP = [
-    [45.4685, 9.1760], [45.4800, 9.1500], [45.5000, 9.1100], [45.5400, 9.0500],
-    [45.5900, 8.9300], [45.6280, 8.7230]
-  ];
-
   var COLORS = {
     sight: '#0e7c66', food: '#c8552c', stay: '#4a63d8', transit: '#9c7c2e'
   };
@@ -86,7 +57,7 @@ window.MilanMap = (function () {
   var activeDay = 'all';
   var layerOn = { sight: true, food: true, stay: true, transit: true };
   var poiById = {};
-  var HOME = [[45.435, 9.130], [45.500, 9.245]];
+  var HOME = CFG.home;
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* Catmull-Rom sampling so routes curve gently */
@@ -147,7 +118,7 @@ window.MilanMap = (function () {
     });
   }
 
-  /* ---------- detail card (unchanged design) ---------- */
+  /* ---------- detail card ---------- */
   function stars(score) {
     var pct = Math.max(0, Math.min(100, score / 5 * 100));
     return '<span class="mc-stars" style="position:relative;color:rgba(28,36,32,0.2)">★★★★★<i style="position:absolute;left:0;top:0;width:' + pct + '%;overflow:hidden;color:#d9a441;font-style:normal">★★★★★</i></span>';
@@ -185,7 +156,7 @@ window.MilanMap = (function () {
       '<div class="mc-links">' +
         (poi.book ? '<a class="mc-book" href="' + poi.book + '" target="_blank" rel="noopener">Check availability →</a>' : '') +
         '<a class="mc-book" href="https://www.google.com/maps/search/?api=1&query=' +
-          encodeURIComponent(poi.type === 'transit' ? poi.lat + ',' + poi.lng : poi.name + ', Milan') +
+          encodeURIComponent(poi.type === 'transit' ? poi.lat + ',' + poi.lng : poi.name + ', ' + (poi.city || window.TRIP.meta.city)) +
           '" target="_blank" rel="noopener">Google Maps ↗</a>' +
         '<button class="mc-book mc-copy" type="button">🔗 Copy link</button>' +
       '</div>';
@@ -307,24 +278,24 @@ window.MilanMap = (function () {
     });
   }
 
-  /* ---------- our overlay geography on the real map ---------- */
+  /* ---------- the trip's overlay geography on the real map ---------- */
   function drawOverlays() {
-    L.polygon(RING, { color: '#d9a441', weight: 1.6, dashArray: '5 4', fillColor: '#d9a441', fillOpacity: 0.06, interactive: false }).addTo(map);
-    L.polygon(SEMPIONE, { color: '#0e7c66', weight: 1.2, fillColor: '#0e7c66', fillOpacity: 0.08, interactive: false }).addTo(map);
-    L.polyline(curve(NAV_GRANDE), { color: '#2b6f8f', weight: 2.4, opacity: 0.8 })
-      .bindTooltip('Naviglio Grande — aperitivo mile', { sticky: true, className: 'lf-tip' }).addTo(map);
-    L.polyline(curve(NAV_PAVESE), { color: '#2b6f8f', weight: 2.4, opacity: 0.8 })
-      .bindTooltip('Naviglio Pavese', { sticky: true, className: 'lf-tip' }).addTo(map);
-    L.polyline(curve(RAIL_BGY), { color: '#b8860b', weight: 2.5, dashArray: '10 6', opacity: 0.8 })
-      .bindTooltip('Sunday: to Bergamo & BGY for FR4845 home', { sticky: true, className: 'lf-tip' }).addTo(map);
-    L.polyline(curve(RAIL_MXP), { color: '#b8860b', weight: 2, dashArray: '6 7', opacity: 0.6 })
-      .bindTooltip('Thursday night: Malpensa Express in', { sticky: true, className: 'lf-tip' }).addTo(map);
+    var geo = CFG.geometry || {};
+    (geo.polygons || []).forEach(function (g) {
+      var layer = L.polygon(g.pts, g.style).addTo(map);
+      if (g.tooltip) layer.bindTooltip(g.tooltip, { sticky: true, className: 'lf-tip' });
+    });
+    (geo.polylines || []).forEach(function (g) {
+      var layer = L.polyline(g.curve === false ? g.pts : curve(g.pts), g.style).addTo(map);
+      if (g.tooltip) layer.bindTooltip(g.tooltip, { sticky: true, className: 'lf-tip' });
+    });
   }
 
-  /* ---------- inset ---------- */
+  /* ---------- country inset ---------- */
   function drawInset() {
     var insetSvg = document.getElementById('inset-svg');
-    if (!insetSvg || !window.IT_OUTLINE) return;
+    var OUTLINE = window[CFG.inset.outlineGlobal];
+    if (!insetSvg || !OUTLINE) return;
     var SVGNS = 'http://www.w3.org/2000/svg';
     function el(name, attrs, parent) {
       var n = document.createElementNS(SVGNS, name);
@@ -332,15 +303,15 @@ window.MilanMap = (function () {
       if (parent) parent.appendChild(n);
       return n;
     }
-    var lats = IT_OUTLINE.map(function (c) { return c[0]; });
-    var lngs = IT_OUTLINE.map(function (c) { return c[1]; });
+    var lats = OUTLINE.map(function (c) { return c[0]; });
+    var lngs = OUTLINE.map(function (c) { return c[1]; });
     var la0 = Math.min.apply(null, lats), la1 = Math.max.apply(null, lats);
     var lo0 = Math.min.apply(null, lngs), lo1 = Math.max.apply(null, lngs);
     var sc = Math.min(108 / (lo1 - lo0), 108 / (la1 - la0));
     function ip(c) { return { x: 6 + (c[1] - lo0) * sc, y: 6 + (la1 - c[0]) * sc * 0.86 }; }
-    var d = 'M' + IT_OUTLINE.map(function (c) { var p = ip(c); return p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' L') + 'Z';
+    var d = 'M' + OUTLINE.map(function (c) { var p = ip(c); return p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' L') + 'Z';
     el('path', { d: d, fill: 'rgba(47,191,154,0.18)', stroke: 'rgba(47,191,154,0.8)', 'stroke-width': 1.2 }, insetSvg);
-    var rb = ip([45.46, 9.19]);
+    var rb = ip(CFG.inset.dot);
     el('circle', { cx: rb.x, cy: rb.y, r: 3.2, fill: '#d9a441' }, insetSvg);
     el('circle', { cx: rb.x, cy: rb.y, r: 6.5, fill: 'none', stroke: '#d9a441', 'stroke-width': 1 }, insetSvg);
   }
@@ -358,16 +329,17 @@ window.MilanMap = (function () {
       zoomControl: false,
       attributionControl: true,
       scrollWheelZoom: false,
-      minZoom: 9,
+      minZoom: CFG.minZoom,
       maxZoom: 18,
-      maxBounds: [[45.15, 8.45], [46.25, 9.95]],
+      maxBounds: CFG.maxBounds,
       maxBoundsViscosity: 0.8
     });
     map.attributionControl.setPrefix(false);
-    if (stage.clientWidth < stage.clientHeight) HOME = [[45.444, 9.155], [45.495, 9.225]];
+    if (stage.clientWidth < stage.clientHeight && CFG.homePortrait) HOME = CFG.homePortrait;
 
     var tileStyle = 'light_all';
-    try { tileStyle = localStorage.getItem('rbMapStyle') === 'dark' ? 'dark_all' : 'light_all'; } catch (e) {}
+    /* style pref: new key first, legacy 'rbMapStyle' still honoured */
+    try { tileStyle = (localStorage.getItem('ptMapStyle') || localStorage.getItem('rbMapStyle')) === 'dark' ? 'dark_all' : 'light_all'; } catch (e) {}
     /* designed fallback tile (faint zellige grid) so dead tiles look intentional */
     function errTile(dark) {
       var bg = dark ? '%231a2425' : '%23e7e3d8', ln = dark ? '%23243231' : '%23d8d2c2';
@@ -401,7 +373,7 @@ window.MilanMap = (function () {
       tiles.setUrl('https://{s}.basemaps.cartocdn.com/' + tileStyle + '/{z}/{x}/{y}{r}.png');
       stage.classList.toggle('is-night', tileStyle === 'dark_all');
       styleLabel();
-      try { localStorage.setItem('rbMapStyle', tileStyle === 'dark_all' ? 'dark' : 'light'); } catch (e) {}
+      try { localStorage.setItem('ptMapStyle', tileStyle === 'dark_all' ? 'dark' : 'light'); } catch (e) {}
     });
 
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
@@ -416,7 +388,7 @@ window.MilanMap = (function () {
     drawMarkers(window.TRIP.pois);
     drawInset();
 
-    /* find-us: live location while on the ground in Rabat */
+    /* find-us: live location while on the ground */
     var locBtn = document.createElement('button');
     locBtn.id = 'map-locate';
     locBtn.setAttribute('aria-label', 'Show our location');
@@ -491,7 +463,7 @@ window.MilanMap = (function () {
     else { var nh = bw / ar; by -= (nh - bh) / 2; bh = nh; }
     var sw = bw / 110;
     var geo = '';
-    [RING, NAV_GRANDE, NAV_PAVESE, SEMPIONE.concat([SEMPIONE[0]])].forEach(function (line) {
+    (CFG.thumb.lines || []).forEach(function (line) {
       geo += '<path d="' + smooth(pts(line)) + '" fill="none" stroke="rgba(165,215,228,0.4)" stroke-width="' + sw + '"/>';
     });
     var route = '<path d="' + smooth(cs) + '" fill="none" stroke="' + day.color + '" stroke-width="' + (sw * 3) + '" stroke-dasharray="' + (sw * 6) + ' ' + (sw * 4) + '" stroke-linecap="round"/>';

@@ -1,7 +1,93 @@
 /* Peacock Travel — Milan trip data
    Ratings & facts researched 12 Jun 2026 (sources in /research/milan-content.md).
    Live stay prices: Booking.com for Thu 9 → Sun 12 Jul 2026, 2 adults + 2 children. */
+
+/* ---- stylised geography (mini-map thumbnails + live-map overlays) ---- */
+function _ellipse(clat, clng, rlat, rlng, n) {
+  var out = [];
+  for (var i = 0; i < n; i++) {
+    var a = i / n * Math.PI * 2;
+    out.push([clat + Math.sin(a) * rlat, clng + Math.cos(a) * rlng]);
+  }
+  out.push(out[0].slice());
+  return out;
+}
+/* Cerchia dei Navigli — the medieval ring around the centro storico */
+var MI_RING = _ellipse(45.4640, 9.1895, 0.0085, 0.0125, 20);
+/* the two canals running out from the Darsena */
+var MI_NAV_GRANDE = [
+  [45.4520, 9.1700], [45.4480, 9.1620], [45.4440, 9.1520],
+  [45.4400, 9.1400], [45.4350, 9.1250], [45.4310, 9.1100]
+];
+var MI_NAV_PAVESE = [
+  [45.4520, 9.1715], [45.4470, 9.1735], [45.4390, 9.1750],
+  [45.4290, 9.1765], [45.4190, 9.1780]
+];
+/* Parco Sempione behind the castle */
+var MI_SEMPIONE = [
+  [45.4795, 9.1690], [45.4790, 9.1790], [45.4745, 9.1815],
+  [45.4705, 9.1775], [45.4720, 9.1690], [45.4765, 9.1660]
+];
+/* railways out to the two airports */
+var MI_RAIL_BGY = [
+  [45.4862, 9.2046], [45.4950, 9.2350], [45.5060, 9.2750], [45.5220, 9.3300],
+  [45.5520, 9.4300], [45.6000, 9.5400], [45.6500, 9.6400], [45.6896, 9.6750]
+];
+var MI_RAIL_MXP = [
+  [45.4685, 9.1760], [45.4800, 9.1500], [45.5000, 9.1100], [45.5400, 9.0500],
+  [45.5900, 8.9300], [45.6280, 8.7230]
+];
+
 window.TRIP = {
+
+  /* engine config — see docs/architecture.md for the schema */
+  meta: {
+    slug: 'milan',
+    city: 'Milan',
+    inPlace: 'we’re in Italia',
+    curtain: { word: 'Milano', sub: 'Peacock Travel · Trip № 2 · Italia' },
+    dep: '2026-07-09T19:20:00+01:00',
+    ret: '2026-07-12T19:00:00+01:00',
+    tz: '+02:00',
+    dayDates: ['2026-07-09', '2026-07-10', '2026-07-11', '2026-07-12'],
+    nights: 3,
+    stayDist: {
+      anchors: [
+        { label: 'Duomo', lat: 45.4642, lng: 9.1900 },
+        { label: 'Castello', lat: 45.4703, lng: 9.1796 }
+      ],
+      far: { emoji: '🚇', label: 'by metro', perKmMin: 5, minMin: 8 }
+    },
+    eatBuckets: [
+      { key: 'centro', label: 'Centro', default: true },
+      { key: 'north', label: 'Brera &amp; north', re: 'Brera|Isola|Porta Nuova|Centrale|Buenos Aires|Garibaldi' },
+      { key: 'navigli', label: 'Navigli', re: 'Navigli|Ticinese|Darsena' }
+    ]
+  },
+  map: {
+    home: [[45.435, 9.130], [45.500, 9.245]],
+    homePortrait: [[45.444, 9.155], [45.495, 9.225]],
+    maxBounds: [[45.15, 8.45], [46.25, 9.95]],
+    minZoom: 9,
+    inset: { outlineGlobal: 'IT_OUTLINE', dot: [45.46, 9.19] },
+    thumb: {
+      bbox: { latMin: 45.400, latMax: 45.530, lngMin: 9.050, lngMax: 9.310 },
+      refLat: 45.46,
+      lines: [MI_RING, MI_NAV_GRANDE, MI_NAV_PAVESE, MI_SEMPIONE.concat([MI_SEMPIONE[0]])]
+    },
+    geometry: {
+      polygons: [
+        { pts: MI_RING, style: { color: '#d9a441', weight: 1.6, dashArray: '5 4', fillColor: '#d9a441', fillOpacity: 0.06, interactive: false } },
+        { pts: MI_SEMPIONE, style: { color: '#0e7c66', weight: 1.2, fillColor: '#0e7c66', fillOpacity: 0.08, interactive: false } }
+      ],
+      polylines: [
+        { pts: MI_NAV_GRANDE, style: { color: '#2b6f8f', weight: 2.4, opacity: 0.8 }, tooltip: 'Naviglio Grande — aperitivo mile' },
+        { pts: MI_NAV_PAVESE, style: { color: '#2b6f8f', weight: 2.4, opacity: 0.8 }, tooltip: 'Naviglio Pavese' },
+        { pts: MI_RAIL_BGY, style: { color: '#b8860b', weight: 2.5, dashArray: '10 6', opacity: 0.8 }, tooltip: 'Sunday: to Bergamo & BGY for FR4845 home' },
+        { pts: MI_RAIL_MXP, style: { color: '#b8860b', weight: 2, dashArray: '6 7', opacity: 0.6 }, tooltip: 'Thursday night: Malpensa Express in' }
+      ]
+    }
+  },
 
   /* Hotlinked from Wikimedia Commons; the illustrated hero beneath stands alone if it can't load. */
   heroPhoto: {
@@ -12,6 +98,7 @@ window.TRIP = {
   },
   eatPhoto: {
     src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Risotto_alla_milanese-Eisen.JPG/640px-Risotto_alla_milanese-Eisen.JPG',
+    alt: 'Saffron-gold risotto alla milanese on a white plate',
     credit: 'Tamorlan · CC BY-SA 3.0 · Wikimedia'
   },
 

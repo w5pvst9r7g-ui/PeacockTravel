@@ -63,7 +63,10 @@ const info = await p.evaluate(() => {
     pois: D.pois.length,
     stays: D.pois.filter(q => q.type === 'stay').length,
     photoPoi: photo ? { id: photo.id, name: photo.name, city: photo.city || null } : null,
-    meta: D.meta ? { city: D.meta.city, dep: D.meta.dep, ret: D.meta.ret } : null,
+    meta: D.meta ? {
+      city: D.meta.city, dep: D.meta.dep, ret: D.meta.ret,
+      day2: D.meta.dayDates ? D.meta.dayDates[1] + 'T12:00:00' + D.meta.tz : null,
+    } : null,
   };
 });
 check('data: has days + pois', info.days >= 2 && info.pois > 10, `${info.days} days, ${info.pois} pois`);
