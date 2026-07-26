@@ -71,7 +71,8 @@
   backdrop-filter: blur(4px);
   white-space: nowrap;
 }
-.hero__pin--dest { color: var(--night); background: var(--gold); border-color: var(--gold); font-weight: 700; }
+/* destination pins: background/border colors come from the trip registry (inline) */
+.hero__pin--dest { color: var(--night); font-weight: 700; }
 
 .hero__copy {
   position: relative;
@@ -400,7 +401,6 @@ a.trip-card:hover .trip-card__go svg { transform: translateX(4px); }
 .crew__member b { display: block; font-size: 1rem; }
 .crew__member span { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.6; }
 
-.hero__pin--mil { color: var(--night); background: var(--mint); border-color: var(--mint); font-weight: 700; }
 .trips__manifest {
   margin-top: clamp(22px, 3vw, 34px);
   font-size: 0.78rem;
