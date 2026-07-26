@@ -50,6 +50,7 @@ Claude session inheriting it). Everything here was learned the hard way once.
 | Kids' assumed ages (8/10) | docs/standards.md, docs/family-profile.md, research/ |
 | Trip dates incl. future absences (Maldives, Queensland) | trips-index.js, docs/trip-log.md, landing board |
 | Drive folder id of the cowork project | CLAUDE.md, docs/playbook-new-trip.md |
+| Travel preferences (budget guideline, flight-time windows, tastes) | docs/family-profile.md (recorded at the family's request) |
 
 Deliberately **not** in this repo: contact details (emails, phones), home address,
 schools, and the booking-process internals that live in the private Drive project.

@@ -7,11 +7,15 @@ add categories and log entries freely, promote a repeated signal into Tastes, an
 delete something when the family contradicts it (note the reversal in the log).
 
 Schema v1 · started 26 Jul 2026 · seeded from the Drive cowork project
-(`travel_planning.md`, `trips.md`), docs/standards.md, and the choices actually made
-on the Rabat + Milan pages. Process rules (booking checklist, parking how-to, calendar
-invite rule) live in the Drive project — this file is *taste*, not *process*.
+(`travel_planning.md`, `trips.md`, and `data/preferences.json` — the machine-readable
+twin the flight scanner uses; last synced from its 18 Jul 2026 version, re-sync when it
+changes), docs/standards.md, and the choices actually made on the Rabat + Milan pages.
+Process rules (booking checklist, parking how-to, calendar invite rule) live in the
+Drive project — this file is *taste*, not *process*.
 This file is public with the rest of the repo — never add personal data the family
-hasn't already exposed on the site (no emails, no addresses, no school names).
+hasn't already exposed or explicitly asked to record (no emails, no addresses, no school
+names, and none of the work-calendar keywords from preferences.json — those stay in
+Drive).
 
 ## Travellers
 
@@ -37,6 +41,13 @@ hasn't already exposed on the site (no emails, no addresses, no school names).
 
 *(Add categories at the end; date-stamp any promotion from the log.)*
 
+- **Ratings — top Google ratings only.** The family's №1 filter: 4.5★+ on Google with a
+  healthy review count before anything gets recommended — restaurants, sights, stays
+  alike. Below-bar entries appear only grouped-and-flagged (`near` / `icon`), never
+  silently mixed in. (Enforcement details: Hard rules + docs/standards.md.)
+- **Activities — water, adventure, food.** The family's stated big three (Drive
+  planning guide). Every itinerary should score on at least two of them; the third
+  usually shows up as a market/food-queue moment.
 - **Water** — the reliable hit. Swimming anchors made both itineraries (Bou Regreg
   rowboat crossing, Lido di Menaggio); Maldives is two whole weeks of it. Every trip
   should have at least one "get wet" moment.
@@ -58,6 +69,18 @@ hasn't already exposed on the site (no emails, no addresses, no school names).
   culturally distinct. Deprioritise northern-European lookalikes. Plan seasonally;
   offer a few options per slot; block anchor trips early; avoid unintended repeats
   (a destination Hailey did solo is NOT "done" as a family trip).
+- **Destination priorities, in the family's own weights** (preferences.json
+  `fit_weights`): **novelty first** (3), then climate (2), then wishlist match and
+  season (1.5 each), then activity supply (1). When two options tie on vibes, the one
+  nobody has been to wins.
+- **Weekend-hop shape & flight windows** (preferences.json — the scanner's rules, and
+  good defaults for any short-trip suggestion): 2–4 nights · guideline budget
+  ~€300 pp return · outbound Thu 17:30–22:00 or Fri 06:30–11:30 · return Sun departing
+  ≥10:00 and landing DUB ≤22:00 (Mondays only when the calendar is marked good) ·
+  **never** depart before 06:00 or land after 23:00 — "family with two kids: no
+  red-eyes, no very-late landings" · under-seat bags only on hops · budget carriers
+  fine (Ryanair dominates DUB). Big anchor trips (Maldives, Queensland) play by their
+  own rules — these windows govern the in-between weekends.
 
 ## Learned per trip (append-only log)
 
