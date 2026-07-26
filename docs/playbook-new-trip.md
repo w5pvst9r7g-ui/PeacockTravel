@@ -1,8 +1,9 @@
 # Playbook — adding a trip page
 
-Proven twice (Rabat, Milan). Milan is the copy-source of record: it uses the `window.TRIP`
-global and the newest engine. Budget a session; the research agents run ~10–15 min in parallel
-with the build.
+Proven twice (Rabat, Milan), then the engine was unified — a new trip is now a **data file
++ thin page shell + one registry entry**; the engine (trip.js / trip-map.js / trip.css) is
+never copied. milan-data.js is the shape reference of record. Budget a session; the
+research agents run ~10–15 min in parallel with the build.
 
 ## 0 · Facts first (never guess)
 0. **Read `docs/family-profile.md`** — the preference library. Its Hard rules + relevant
@@ -34,32 +35,42 @@ with the build.
   booking URLs (they carry dates+party) for the `book` field.
 
 ## 2 · Build (start while agents run — stub data first)
-1. `assets/data/<trip>-data.js` — stub `window.TRIP` with a few pois/days so the template
-   smoke-tests; replace with the researched file when agents land.
-2. `assets/js/<trip>-map.js` — copy milan-map.js; swap: global name, thumbnail BBOX + KMX
-   latitude, thumb/overlay geometry (rings/rivers/rails of the new city), HOME (+portrait),
-   maxBounds (wide enough for day-trip markers — day tabs flying out of the city is a
-   signature moment), minZoom, inset outline (generate via `tools/gen-dots.mjs` pattern from
-   world-atlas 50m → `assets/data/<country>-outline.js`), Google-query default city.
-3. `assets/js/<trip>.js` — copy milan.js; swap DEP/RET datetimes (mind time zones),
-   `dayStart` month/day math, curtain word + trip №, walk anchors + labels
-   (Duomo/Castello → local equivalents), eatBucket regexes + chip labels, countdown wording.
-4. `<trip>.html` — copy milan.html; new hero scene SVG (sky gradient + 2–3 silhouette layers
-   in the city's palette), title letters (one italic-gold), chips, brief lede + 4 facts,
-   day-tab labels, extra-section card, footer word, og: meta (og:image = hero photo 1280).
-5. `assets/css/<trip>.css` — hero bg + photo tint + footer stripe only. Everything else is
-   rabat.css (shared).
-6. Landing: trip card (new SVG art), globe arc + pin + board line in landing.js
-   (follow the MIL diff), manifest note if the roster changed.
+1. `assets/data/<trip>-data.js` — the only substantial file. Copy milan-data.js as the
+   shape reference; fill `window.TRIP` (full schema: docs/architecture.md):
+   - `meta` — dep/ret with the right UTC offsets + dayDates + destination tz (from step 0),
+     curtain word + trip №, `city` for Google queries, eatBucket chips, `stayDist`
+     anchors = the trip's two walk targets (Duomo/Castello → local equivalents), plus
+     `far` (taxi vs metro voice) and any `special` cases (the Salé rowboat pattern).
+   - `map` — HOME (+portrait) and maxBounds wide enough for day-trip markers (day tabs
+     flying out of the city is a signature moment), minZoom, thumb bbox + refLat,
+     stylised thumb lines + overlay geometry (declare shared point arrays above
+     `window.TRIP`; `_ellipse()` in milan-data.js shows computed geometry), inset outline
+     (generate via the `tools/gen-dots.mjs` pattern from world-atlas 50m →
+     `assets/data/<country>-outline.js`).
+   - Stub a few pois/days first so the shell smoke-tests; swap in researched content
+     when the agents land.
+2. `<trip>.html` — copy milan.html; swap the bespoke parts only: og: meta (og:image =
+   hero photo 1280), hero scene SVG (sky gradient + 2–3 silhouette layers in the city's
+   palette), title letters (one italic-gold), chips, brief lede + 4 facts, day-tab labels
+   (one per day), extra-section card, footer word. Script tags already point at the
+   shared engine (outline → data → trip-map.js → trip.js) — copy them as-is.
+3. `assets/css/<trip>.css` — hero bg + photo tint + footer stripe only (see milan.css).
+   Everything else is trip.css (shared). Body class: `trip-page <slug>`.
+4. Landing — exactly two touches: one registry entry in `assets/data/trips-index.js`
+   (the file header documents every field) + one `<template id="art-<slug>">` card scene
+   in index.html. Cards, globe arc + pin, board, marquee and footer links all follow.
 
 ## 3 · Verify (all of it, headless)
-- `node tools/shoot.mjs <trip>.html x` — zero non-blocked issues both viewports.
-- Interaction probe (copy /tmp patterns from history or improvise): each day tab (routes,
-  manifest, numbered badges), `focusPoi` card **with a photo poi**, deep link
-  `#poi=…` cold-load, stay Compare toggle + a sort, dining filter, `__RB_NOW` mid-trip
-  simulation (chip text, past/today tags, auto day-select).
-- Photo-state test: rewrite `img.src` to a local asset in-page to see loaded layout;
-  a dead URL to see the fallback.
+- `node tools/shoot.mjs <trip>.html x` — zero non-noise issues both viewports (exit 0).
+- `node tools/probe.mjs <trip>.html` — the committed interaction probe covers the whole
+  checklist: every day tab (routes, manifest, numbered badges), a photo-poi card incl.
+  its Google-Maps query, thumbs, `#poi=`/`#day=` cold loads (curtain skipped), dining
+  filters, Compare toggle + sorting, and `__TRIP_NOW` pre/mid/post simulations
+  (chip text, today tags, auto day-select). All checks must PASS (exit 0).
+- Photo-state test (manual): rewrite `img.src` to a local asset in-page to see loaded
+  layout; a dead URL to see the fallback.
+- Engine rule: if you touched trip.js / trip-map.js / trip.css at all, shoot + probe
+  **both existing pages** too.
 
 ## 4 · Ship & close the loop
 - Commit (message = what a reader needs, session link footer), push → auto-deploy;

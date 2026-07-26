@@ -1,43 +1,58 @@
 # Operations — verify, deploy, environment, gotchas
 
-## Verification harness (tools/)
-- `node tools/shoot.mjs <page>.html <prefix>` — serves the repo on :8377, loads the page at
-  1440×900 and 390×844(dsf2), scroll-throughs to fire reveals, captures hero + fullPage to
-  `/tmp/<prefix>-*.png`, reports console errors / pageerrors / failed requests / horizontal
-  overflow with offending elements.
-- `node tools/shoot-sections.mjs` — per-section viewport captures + map interaction pass
-  (Rabat-specific; adapt inline for other pages, see /tmp probe scripts in session history).
+## Verification harness (tools/ — self-contained, runs on any machine)
+
+Setup once per machine: `cd tools && npm i` (with a system Chrome installed,
+`npm i --omit=optional` skips the fallback-Chromium download). Browser resolution:
+`$PEACOCK_CHROME` → common system paths (incl. this sandbox's `/opt/pw-browsers`) →
+`@sparticuz/chromium`. All output lands in `tools/shots/` (gitignored).
+
+- `node tools/shoot.mjs <page>.html <prefix>` — serves the repo on :8377, loads the page
+  at 1440×900 and 390×844(dsf2), scroll-throughs to fire reveals, captures hero + fullPage,
+  reports console errors / pageerrors / failed requests / horizontal overflow. Sandbox
+  cert noise is counted separately; exit code 0 = clean.
+- `node tools/probe.mjs <page>.html` — assertion-based interaction probe for a trip page:
+  day tabs (badges/manifest/tab sync), photo-poi card + its Google-Maps query, thumbs,
+  deep links (curtain skipped), eat filters, Compare table + sorting, trip clock at
+  pre/mid/post instants (`__TRIP_NOW`). ~34 checks; exit 0 = all pass.
+- `node tools/set-site-url.mjs [--dry-run | <new-base>]` — repo-move URL rewriter
+  (docs/MIGRATION.md).
+- `node tools/gen-dots.mjs` — regenerates the globe land grid (world-atlas → JSON;
+  hand-wrap into assets/data/land-dots.js).
 - **Expected failures in the sandbox:** `ERR_CERT_AUTHORITY_INVALID` / reqfail for
-  `upload.wikimedia.org` and `*.cartocdn.com` — the egress proxy MITMs unknown hosts. Filter
-  with `grep -vE "ERR_CERT|cartocdn|wikimedia|Failed to load resource"`; anything left is real.
-- Judge results programmatically when eyes disagree: `document.elementFromPoint`, ray-cast
-  geometry checks, DOM state via `page.evaluate` — twice this caught "bugs" that were
-  actually misread screenshots, and once the reverse.
+  `upload.wikimedia.org` and `*.cartocdn.com` — the egress proxy MITMs unknown hosts.
+  The tools filter these automatically; anything they still report is real.
+- Judge results programmatically when eyes disagree: `document.elementFromPoint`,
+  ray-cast geometry checks, DOM state via `page.evaluate` — twice this caught "bugs"
+  that were actually misread screenshots, and once the reverse.
 
 ## Deploy
-- Push to `claude/elegant-clarke-w9i5ro` → `.github/workflows/pages.yml` deploys to
-  https://w5pvst9r7g-ui.github.io/PeacockTravel/ (~40s). It is production; there's no staging.
-- Confirm: `mcp__github__actions_list` (pages.yml, per_page 1) — the response overflows, so
-  `jq -r '.workflow_runs[0] | "\(.run_number) \(.status)/\(.conclusion)"'` on the saved file.
-- Pages needed a one-time manual enable (Settings→Pages→GitHub Actions) — the workflow token
-  cannot create the Pages site (run #1 failed exactly this way). Already done; remember if
-  the repo is ever recreated.
-- Timers: foreground `sleep` is blocked; use `Bash run_in_background: sleep N` + `TaskOutput`.
 
-## Environment rebuild (container is ephemeral)
-```bash
-cd /tmp/vendor  # recreate if gone
-npm i gsap three@0.149 leaflet@1.9.4 leaflet.markercluster@1.5.3 \
-      @fontsource-variable/fraunces @fontsource-variable/space-grotesk \
-      world-atlas@2 topojson-client d3-geo \
-      @sparticuz/chromium@131 puppeteer-core@23
-```
-Vendored copies already live in the repo; the npm set is only for the harness (chromium) and
-for regenerating data (gen-dots/outlines). Playwright browser downloads are blocked — use
-`@sparticuz/chromium` with `puppeteer.launch({args:[...chromium.args,'--no-sandbox'],
-executablePath: await chromium.executablePath(), headless:'shell'})`.
+- Push to `claude/elegant-clarke-w9i5ro` (or `main`) → `.github/workflows/pages.yml`
+  deploys to https://w5pvst9r7g-ui.github.io/PeacockTravel/ (~40s). It is production;
+  there's no staging. The artifact is the **whole repo** (docs/ and research/ included).
+- Confirm: `mcp__github__actions_list` (pages.yml, per_page 1) — the response overflows,
+  so `jq -r '.workflow_runs[0] | "\(.run_number) \(.status)/\(.conclusion)"'` on the saved file.
+- Pages needed a one-time manual enable (Settings→Pages→GitHub Actions) — the workflow
+  token cannot create the Pages site (run #1 failed exactly this way). Already done here;
+  **required again after any repo move** — full checklist in docs/MIGRATION.md.
+
+## Environment profiles
+
+**This remote sandbox:** egress proxy allows npm/git/MCP only (browsers/curl to the open
+web fail by design); headless Chromium pre-installed at `/opt/pw-browsers/chromium` (the
+harness finds it); foreground `sleep` blocked — use `Bash run_in_background: sleep N` +
+`TaskOutput`. The container is ephemeral: after a recycle, re-run `cd tools && npm i`.
+
+**A normal machine:** `cd tools && npm i --omit=optional` and everything runs; no proxy
+filters needed (wikimedia/cartocdn will actually load, so screenshots show real photos
+and tiles).
+
+Runtime libraries (GSAP, Three, Leaflet, fonts) are vendored in the repo — the npm set
+is dev-tooling only.
 
 ## Gotchas (each cost real debugging time)
+
 1. `loading="lazy"` inside a `display:none` container **never fetches** — card photos are
    eager, revealed on `load`.
 2. `[hidden]` loses to any `display:` class rule — base.css carries the global
@@ -45,8 +60,7 @@ executablePath: await chromium.executablePath(), headless:'shell'})`.
 3. Leaflet's internal z-indexes (up to ~800) escape unless the container forms a stacking
    context — `.rb-map__canvas{z-index:1}` is load-bearing.
 4. Puppeteer clicks can land on the fixed nav when `scrollIntoView` puts a control under it —
-   a **test artifact**, not a page bug; probe with `evaluate(() => el.click())` before
-   "fixing" the page.
+   a **test artifact**, not a page bug; probe.mjs drives controls via `evaluate` clicks.
 5. fullPage screenshots distort `100svh` heroes (duplicated/stretched sections) — trust
    per-viewport shots; fullPage is for section inventory only.
 6. GSAP `.from(...)` + ScrollTrigger leaves unfired elements at opacity 0 — reveals use
@@ -60,3 +74,7 @@ executablePath: await chromium.executablePath(), headless:'shell'})`.
    the story); marker visibility is add/remove from the cluster group, not opacity.
 10. `zoom-reset` (⌂) = closeCard + setDay('all'); day tabs write `#day=`,
     cards write `#poi=` via replaceState (no hashchange loop).
+11. Landing DOM injection must happen **before** the GSAP `.reveal` scan in landing.js —
+    generated cards otherwise never animate in.
+12. Chrome 128+ refuses software WebGL without `--use-angle=swiftshader
+    --enable-unsafe-swiftshader` — the harness passes them; the globe needs them headless.

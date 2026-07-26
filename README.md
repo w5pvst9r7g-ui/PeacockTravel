@@ -1,38 +1,39 @@
 # Peacock Travel — The Family Atlas
 
-A fully self-contained static site for planning the Peacock family's trips.
+A fully self-contained static site for planning (and now remembering) the Peacock
+family's trips.
 
 **Live:** https://w5pvst9r7g-ui.github.io/PeacockTravel/ — every push to the working branch
 auto-deploys via GitHub Actions.
 
-**Project knowledge base:** `CLAUDE.md` (session memory) + `docs/` — architecture, the
-new-trip playbook, research/licensing standards, operations & gotchas, and the live trip log.
+**Project knowledge base:** `CLAUDE.md` (start here) + `docs/` — architecture, the
+new-trip playbook, the family preference library, research/licensing standards,
+operations & gotchas, the live trip log, and `docs/MIGRATION.md` for moving the repo.
 
 ## Pages
 
-- **`index.html`** — landing page: an interactive 3D dotted globe (Three.js) tracing the
-  Dublin → Rabat and Dublin → Milano flight arcs, the departures board of upcoming trips,
-  and the family crew.
-- **`milan.html`** — Milano 2026 (Thu 9 → Sun 12 Jul, FR7799/FR4845, booking A567VA): first
-  family trip to Italy — Duomo-rooftop morning, Lake Como Saturday, Bergamo Città Alta
-  finale, Last Supper booking playbook, live-priced family stays, all on the same live-map
-  engine as Rabat.
-- **`rabat.html`** — the Rabat 2026 trip (Fri 19 → Mon 22 Jun, FR 162/163, booking H7M9XX):
-  - day-by-day itinerary with per-stop icons, clickable mini-map route thumbnails,
-    Google Maps links on every stop, and a live countdown chip in the hero
-  - real-geography interactive map: grey OpenStreetMap basemap (CARTO Positron,
-    vendored Leaflet) with a Paper/Night style toggle, marker clustering, day
-    routes with numbered stops and a synced manifest, photo detail cards,
-    medina/kasbah district tints, the ONCF railway to Casablanca, find-us
-    geolocation, designed fallback tiles, lazy boot, and shareable deep links
-    (#poi=…, #day=…)
-  - the table list — verified Google ratings (honest flags below the 4.5★ bar)
-    with old-town/centre/south, kid-wins and cheap-eats filters
-  - stay options with live Booking.com pricing, computed walk/taxi times, a
-    sortable comparison table, a front-runner pick, and booking + Google links
-  - trip-time awareness (countdown, today's chapter, auto day-select mid-trip),
-    a print-ready paper trip sheet, Friday Casablanca plan, neighbourhood guide,
-    practical facts; licensed Wikimedia photography layered into the illustrated hero
+- **`index.html`** — landing: an interactive 3D dotted globe (Three.js) tracing the
+  family's flight arcs, trip cards, and a departures board — all rendered from the trip
+  registry (`assets/data/trips-index.js`), so statuses flip to "Travelling now" /
+  "Travelled ✓" by themselves as dates pass.
+- **`milan.html`** — Milano 2026 (Thu 9 → Sun 12 Jul, FR7799/FR4845, booking A567VA):
+  Duomo-rooftop morning, Lake Como Saturday, Bergamo Città Alta finale, Last Supper
+  booking playbook, live-priced family stays.
+- **`rabat.html`** — Rabat 2026 (Fri 19 → Mon 22 Jun, FR 162/163, booking H7M9XX):
+  Casablanca Friday, rowboat-and-Kasbah Saturday, storks over Chellah — the page that
+  built the engine.
+
+Both trip pages run on the same shared engine (`assets/js/trip.js` + `trip-map.js` +
+`assets/css/trip.css`): day-by-day itinerary with mini-map route thumbnails and a live
+countdown chip · a real-geography interactive map (grey CARTO/OSM basemap on vendored
+Leaflet, Paper/Night toggle, marker clustering, numbered day routes with a synced
+manifest, photo detail cards, district tints, railway lines, geolocation, designed
+fallback tiles, lazy boot, `#poi=`/`#day=` deep links) · verified Google ratings with
+honest below-bar flags and filter chips · stays with live Booking.com pricing, computed
+walk/taxi times and a sortable comparison table · trip-time awareness (countdown, today's
+chapter, auto day-select mid-trip) · a print-ready paper trip sheet · licensed Wikimedia
+photography layered over illustrated fallbacks. Everything trip-specific lives in the
+trip's data file — see `docs/architecture.md`.
 
 ## Running
 
@@ -42,20 +43,29 @@ Pure static — open `index.html` directly, or serve the folder:
 python3 -m http.server 8000
 ```
 
-No build step, no CDN dependencies: GSAP, Three.js, fonts (Fraunces + Space Grotesk) and
-geo data are vendored under `assets/`. The only network request is the Rabat hero photo,
-hotlinked from Wikimedia Commons — if it can't load, the illustrated hero stands alone.
+No build step, no CDN dependencies: GSAP, Three.js, Leaflet, fonts (Fraunces + Space
+Grotesk) and geo data are vendored under `assets/`. At runtime the pages stream only two
+kinds of external content: CARTO/OSM map tiles and Wikimedia Commons photography — both
+degrade gracefully (designed fallback tiles; illustrated heroes that stand alone).
+
+Dev tools (screenshot/interaction harness): `cd tools && npm i`, then
+`node tools/shoot.mjs <page> <prefix>` and `node tools/probe.mjs <page>` —
+see `docs/operations.md`.
 
 ## Structure
 
 ```
 assets/
-  css/         base.css (design system) · landing.css · rabat.css
-  js/          landing.js (globe) · rabat.js (page) · rabat-map.js (map engine) · vendor/
-  data/        land-dots.js (globe) · morocco-outline.js (inset) · rabat-data.js (trip content)
-  fonts/       variable woff2
+  css/         base.css (design system) · landing.css · trip.css (shared trip engine)
+               · milan.css (accents) · vendor/
+  js/          landing.js (globe + registry-driven landing) · trip.js (shared page logic)
+               · trip-map.js (shared map engine) · vendor/
+  data/        trips-index.js (trip registry) · rabat-data.js · milan-data.js
+               · land-dots.js · morocco-outline.js · italy-outline.js
+  fonts/       variable woff2 + OFL.txt
 research/      research packs behind the content (ratings sources, image licensing)
-tools/         dev-only: dot-grid generator, headless-Chrome screenshot/verification harness
+tools/         self-contained dev harness: shoot/probe/gen-dots/set-site-url (npm i inside)
+docs/          knowledge base incl. MIGRATION.md and the family preference library
 ```
 
 ## Licensing
@@ -67,9 +77,10 @@ licenses — see `THIRD-PARTY.md` and `assets/fonts/OFL.txt`.
 
 ## Data honesty
 
-Every rating on the Rabat page was researched 11 Jun 2026 with sources recorded in
-`research/rabat-content.md`. Restaurants that miss the family's 4.5★ bar are shown with
-flags rather than hidden or rounded up. Stay prices come from a live Booking.com search
-for 2 adults + 2 children, 19–22 Jun 2026.
+Every rating was researched with sources recorded in `research/` (Rabat: 11 Jun 2026,
+Milan: 12 Jun 2026). Restaurants that miss the family's 4.5★ bar are shown with flags
+rather than hidden or rounded up. Stay prices come from live Booking.com searches for
+2 adults + 2 children on the exact trip dates.
 
-Hero photo: MarwanAndrew, CC BY-SA 4.0, via Wikimedia Commons.
+Hero photos: Rabat — MarwanAndrew, CC BY-SA 4.0 · Milan — Daniel Case, CC BY-SA 3.0,
+both via Wikimedia Commons, credited on-page.
