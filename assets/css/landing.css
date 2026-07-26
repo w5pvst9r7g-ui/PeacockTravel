@@ -279,6 +279,7 @@ a.trip-card:hover .trip-card__art svg { transform: scale(1.05); }
 }
 .trip-card__status i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2.2s infinite; }
 .trip-card__status--amber { color: #b07816; }
+.trip-card__status--past { color: rgba(28, 36, 32, 0.55); }
 .trip-card__dates { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 36, 32, 0.6); }
 .trip-card__name {
   font-family: var(--serif);

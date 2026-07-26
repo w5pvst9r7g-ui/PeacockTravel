@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Peacock Travel — The Family Atlas</title>
-  <meta name="description" content="Peacock Travel is the planning home for the Peacock family's adventures — every trip researched, rated and mapped before wheels-up. Next stop: Rabat, Morocco." />
+  <meta name="description" content="Peacock Travel is the planning home for the Peacock family's adventures — every trip researched, rated and mapped before wheels-up." />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Peacock Travel — The Family Atlas" />
-  <meta property="og:description" content="Four passports, one map. Every trip researched, rated 4.5★ or better, and mapped before wheels-up. Next stop: Rabat." />
+  <meta property="og:description" content="Four passports, one map. Every trip researched, rated 4.5★ or better, and mapped before wheels-up." />
   <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Rabat_City_1.JPG/1280px-Rabat_City_1.JPG" />
   <meta property="og:url" content="https://w5pvst9r7g-ui.github.io/PeacockTravel/" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -36,7 +36,7 @@
       <a href="#trips">Trips</a>
       <a href="#method">How we plan</a>
       <a href="#crew">The crew</a>
-      <a class="nav__cta" href="rabat.html">Next stop&nbsp;→&nbsp;Rabat</a>
+      <a class="nav__cta" href="#trips" id="nav-cta">The atlas&nbsp;→</a>
     </nav>
   </header>
 
@@ -63,20 +63,16 @@
           and mapped before wheels-up.
         </p>
         <div class="hero__actions reveal">
-          <a class="btn btn--gold" href="rabat.html">Explore the Rabat plan
+          <a class="btn btn--gold" href="#trips" id="hero-cta">See the trips
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
           <a class="btn btn--ghost" href="#trips">See all departures</a>
         </div>
       </div>
 
-      <div class="hero__board reveal" role="note" aria-label="Next departure">
+      <div class="hero__board reveal" role="note" aria-label="Departures board" id="hero-board">
         <span class="hero__board-dot" aria-hidden="true"></span>
-        <span class="hero__board-item"><b>Next departure</b> DUB → RBA</span>
-        <span class="hero__board-item">Fri 19 Jun 2026 · 07:55</span>
-        <span class="hero__board-item">Ryanair FR 162 · 4 seats, row 23</span>
-        <span class="hero__board-item">Then Milano · 9 Jul · FR7799</span>
-        <span class="hero__board-item hero__board-item--status">Boarding the plan&nbsp;↗</span>
+        <span class="hero__board-item"><b>Departures</b> the family board</span>
       </div>
 
       <a class="hero__scroll" href="#trips" aria-label="Scroll to trips">
@@ -86,7 +82,7 @@
 
     <!-- ============ MARQUEE ============ -->
     <div class="marquee" aria-hidden="true">
-      <div class="marquee__track">
+      <div class="marquee__track" id="marquee-track">
         <span>Rabat&nbsp;الرباط</span><i>✦</i><span>Atlantic light</span><i>✦</i><span>Mint tea, two sugars</span><i>✦</i><span>Kasbah blue</span><i>✦</i><span>Storks over Chellah</span><i>✦</i><span>Window seats only</span><i>✦</i>
         <span>Rabat&nbsp;الرباط</span><i>✦</i><span>Atlantic light</span><i>✦</i><span>Mint tea, two sugars</span><i>✦</i><span>Kasbah blue</span><i>✦</i><span>Storks over Chellah</span><i>✦</i><span>Window seats only</span><i>✦</i>
       </div>
@@ -101,8 +97,8 @@
       </header>
 
       <div class="trips__grid">
-        <!-- RABAT — live -->
-        <a class="trip-card trip-card--live reveal" href="rabat.html">
+        <!-- bespoke card scenes, cloned by landing.js (one template per trip page) -->
+        <template id="art-rabat">
           <div class="trip-card__art trip-card__art--rabat" aria-hidden="true">
             <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
               <defs>
@@ -131,26 +127,8 @@
               </g>
             </svg>
           </div>
-          <div class="trip-card__body">
-            <div class="trip-card__row">
-              <span class="trip-card__status"><i></i>Planning live</span>
-              <span class="trip-card__dates">19 – 22 Jun 2026</span>
-            </div>
-            <h3 class="trip-card__name">Rabat <span class="serif-i">Morocco</span></h3>
-            <p class="trip-card__desc">Three nights between the Kasbah and the Atlantic. Flights booked — riads, tagines and the day-by-day map are ready for choosing.</p>
-            <ul class="trip-card__facts">
-              <li>✈ FR 162 / 163 · booked</li>
-              <li>👨‍👩‍👧‍👦 4 travellers</li>
-              <li>🛏 Stay · choosing</li>
-            </ul>
-            <span class="trip-card__go">Open the plan
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </div>
-        </a>
-
-        <!-- MILANO — live -->
-        <a class="trip-card trip-card--live reveal" href="milan.html">
+        </template>
+        <template id="art-milan">
           <div class="trip-card__art trip-card__art--milan" aria-hidden="true">
             <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
               <defs>
@@ -179,23 +157,27 @@
               </g>
             </svg>
           </div>
-          <div class="trip-card__body">
-            <div class="trip-card__row">
-              <span class="trip-card__status"><i></i>Planning live</span>
-              <span class="trip-card__dates">9 – 12 Jul 2026</span>
-            </div>
-            <h3 class="trip-card__name">Milano <span class="serif-i">Italia</span></h3>
-            <p class="trip-card__desc">First family trip to Italy: the Duomo's marble rooftop, Leonardo's canals, a lake on Saturday and home via Bergamo's walled hill town.</p>
-            <ul class="trip-card__facts">
-              <li>✈ FR7799 / FR4845 · booked</li>
-              <li>👨‍👩‍👧‍👦 4 travellers</li>
-              <li>🛏 Stay · choosing</li>
-            </ul>
-            <span class="trip-card__go">Open the plan
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
+        </template>
+        <template id="art-generic">
+          <div class="trip-card__art" aria-hidden="true">
+            <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="genSky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#2a4b46"/>
+                  <stop offset="0.6" stop-color="#0e7c66"/>
+                  <stop offset="1" stop-color="#0c1512"/>
+                </linearGradient>
+              </defs>
+              <rect width="400" height="300" fill="url(#genSky)"/>
+              <circle cx="290" cy="100" r="40" fill="#ffe2a8" opacity="0.9"/>
+              <g fill="none" stroke="#ffe2a8" stroke-width="2" opacity="0.75">
+                <path d="M40 220 q160 -150 320 -60" stroke-dasharray="6 8"/>
+              </g>
+              <circle cx="40" cy="220" r="6" fill="#f7f1e3"/>
+              <circle cx="360" cy="160" r="8" fill="#d9a441"/>
+            </svg>
           </div>
-        </a>
+        </template>
 
         <!-- WHERE NEXT -->
         <div class="trip-card trip-card--empty reveal" aria-label="Future trip — suggestions welcome">
@@ -214,7 +196,7 @@
           </div>
         </div>
       </div>
-      <p class="trips__manifest reveal">Also on the manifest: <b>Maldives</b> — two weeks, late July · <b>Queensland</b> — Christmas at home.</p>
+      <p class="trips__manifest reveal" id="trips-manifest">Also on the manifest: <b>Maldives</b> — two weeks, late July · <b>Queensland</b> — Christmas at home.</p>
     </section>
     <section class="method" id="method">
       <div class="method__inner">
@@ -269,10 +251,9 @@
   <footer class="footer">
     <div class="footer__row">
       <p class="footer__word">Go far,<br/><em>together.</em></p>
-      <nav class="footer__links" aria-label="Footer">
+      <nav class="footer__links" aria-label="Footer" id="footer-links">
         <a href="#trips">Trips</a>
         <a href="#method">How we plan</a>
-        <a href="rabat.html">Rabat 2026</a>
       </nav>
     </div>
     <div class="footer__meta">
@@ -286,6 +267,7 @@
   <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
   <script src="assets/js/vendor/three.min.js"></script>
   <script src="assets/data/land-dots.js"></script>
+  <script src="assets/data/trips-index.js"></script>
   <script src="assets/js/landing.js"></script>
 </body>
 </html>

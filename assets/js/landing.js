@@ -12,6 +12,109 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /* ---------------- trip registry → landing state ---------------- */
+  /* Everything trip-shaped below (cards, board, marquee, CTAs, manifest,
+     footer links) renders from window.TRIPS — see assets/data/trips-index.js.
+     Status honours the __TRIP_NOW test hook used by the trip pages. */
+  var TRIPS = window.TRIPS || [];
+  var _now = window.__TRIP_NOW ? new Date(window.__TRIP_NOW) : new Date();
+  TRIPS.forEach(function (t) {
+    t.depD = new Date(t.dep); t.retD = new Date(t.ret);
+    t.status = _now < t.depD ? 'upcoming' : (_now <= t.retD ? 'travelling' : 'travelled');
+  });
+  var upcoming = TRIPS.filter(function (t) { return t.status === 'upcoming'; })
+    .sort(function (a, b) { return a.depD - b.depD; });
+  var liveTrip = TRIPS.filter(function (t) { return t.status === 'travelling'; })[0] || null;
+  var featured = liveTrip || upcoming[0] || null; /* board + marquee voice */
+  var pageTrips = TRIPS.filter(function (t) { return t.page; });
+  var nextPageTrip = pageTrips.filter(function (t) { return t.status === 'upcoming'; })[0] || null;
+  var latestPageTrip = pageTrips.slice().sort(function (a, b) { return b.depD - a.depD; })[0] || null;
+
+  /* nav + hero CTAs */
+  var navCta = document.getElementById('nav-cta');
+  var heroCta = document.getElementById('hero-cta');
+  if (nextPageTrip) {
+    if (navCta) { navCta.href = nextPageTrip.page; navCta.innerHTML = 'Next stop\u00a0\u2192\u00a0' + nextPageTrip.name; }
+    if (heroCta) { heroCta.href = nextPageTrip.page; heroCta.firstChild.textContent = 'Explore the ' + nextPageTrip.name + ' plan'; }
+  } else if (latestPageTrip && heroCta) {
+    heroCta.href = latestPageTrip.page;
+    heroCta.firstChild.textContent = 'Revisit the ' + latestPageTrip.name + ' plan';
+  }
+
+  /* departures board */
+  var board = document.getElementById('hero-board');
+  if (board) {
+    function bItem(html, cls) { return '<span class="hero__board-item' + (cls || '') + '">' + html + '</span>'; }
+    var bHtml = '<span class="hero__board-dot" aria-hidden="true"></span>';
+    var bStatus;
+    if (featured) {
+      bHtml += bItem('<b>' + (featured.status === 'travelling' ? 'Now travelling' : 'Next departure') + '</b> ' + (featured.route || featured.name));
+      bHtml += bItem(featured.boardWhen);
+      if (featured.boardDetail) bHtml += bItem(featured.boardDetail);
+      var then = upcoming.filter(function (t) { return t !== featured; })[0];
+      if (then) bHtml += bItem('Then ' + then.name + ' · ' + then.shortWhen);
+      bStatus = featured.status === 'travelling' ? 'Living the plan\u00a0\u2197' : 'Boarding the plan\u00a0\u2197';
+    } else {
+      bHtml += bItem('<b>Home with stories</b> every trip flown');
+      bHtml += bItem('The atlas is open — pitch the next one at dinner');
+      bStatus = 'Where next?\u00a0\u2197';
+    }
+    bHtml += bItem(bStatus, ' hero__board-item--status');
+    board.innerHTML = bHtml;
+  }
+
+  /* marquee — the featured trip's phrases, else the house voice */
+  var track = document.getElementById('marquee-track');
+  if (track) {
+    var phrases = (featured && featured.marquee) ||
+      ['The Family Atlas', 'Four passports, one map', 'Researched, rated, mapped', 'Window seats only'];
+    var run = phrases.map(function (w) { return '<span>' + w.replace(/ /, '\u00a0') + '</span><i>✦</i>'; }).join('');
+    track.innerHTML = run + run;
+  }
+
+  /* trip cards (inserted before the static "Where next?" card) */
+  var grid = document.querySelector('.trips__grid');
+  var emptyCard = grid && grid.querySelector('.trip-card--empty');
+  var STATUS_TEXT = { upcoming: 'Planning live', travelling: 'Travelling now', travelled: 'Travelled ✓' };
+  var GO_ARROW = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  if (grid) pageTrips.forEach(function (t) {
+    var a = document.createElement('a');
+    a.className = 'trip-card trip-card--live reveal' + (t.status === 'travelled' ? ' trip-card--past' : '');
+    a.href = t.page;
+    var tpl = document.getElementById(t.art) || document.getElementById('art-generic');
+    if (tpl) a.appendChild(tpl.content.cloneNode(true));
+    var body = document.createElement('div');
+    body.className = 'trip-card__body';
+    body.innerHTML =
+      '<div class="trip-card__row">' +
+        '<span class="trip-card__status' + (t.status === 'travelled' ? ' trip-card__status--past' : '') + '">' +
+          (t.status === 'travelled' ? '' : '<i></i>') + STATUS_TEXT[t.status] + '</span>' +
+        '<span class="trip-card__dates">' + t.dates + '</span>' +
+      '</div>' +
+      '<h3 class="trip-card__name">' + t.name + ' <span class="serif-i">' + t.place + '</span></h3>' +
+      '<p class="trip-card__desc">' + t.desc + '</p>' +
+      '<ul class="trip-card__facts">' + (t.facts || []).map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>' +
+      '<span class="trip-card__go">Open the plan ' + GO_ARROW + '</span>';
+    a.appendChild(body);
+    grid.insertBefore(a, emptyCard);
+  });
+
+  /* manifest note + footer links */
+  var manifestEl = document.getElementById('trips-manifest');
+  var manifestTrips = TRIPS.filter(function (t) { return t.manifest; });
+  if (manifestEl && manifestTrips.length) {
+    manifestEl.innerHTML = 'Also on the manifest: ' + manifestTrips.map(function (t) {
+      return '<b>' + t.name + '</b> — ' + t.manifest;
+    }).join(' · ') + '.';
+  }
+  var footerLinks = document.getElementById('footer-links');
+  if (footerLinks) pageTrips.forEach(function (t) {
+    var a = document.createElement('a');
+    a.href = t.page;
+    a.textContent = t.name + ' ' + t.depD.getFullYear();
+    footerLinks.appendChild(a);
+  });
+
   /* ---------------- GSAP reveals ---------------- */
   if (window.gsap && !prefersReduced) {
     gsap.registerPlugin(ScrollTrigger);
