@@ -58,6 +58,13 @@ research/      research packs behind the content (ratings sources, image licensi
 tools/         dev-only: dot-grid generator, headless-Chrome screenshot/verification harness
 ```
 
+## Licensing
+
+Personal family project — the family's own content (copy, data, illustrations,
+research) is not licensed for reuse. Vendored third-party components (GSAP, Three.js,
+Leaflet, markercluster, the Fraunces & Space Grotesk fonts) remain under their own
+licenses — see `THIRD-PARTY.md` and `assets/fonts/OFL.txt`.
+
 ## Data honesty
 
 Every rating on the Rabat page was researched 11 Jun 2026 with sources recorded in
