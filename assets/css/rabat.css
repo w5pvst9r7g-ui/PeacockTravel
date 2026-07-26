@@ -971,6 +971,8 @@ section[id] { scroll-margin-top: 64px; }
   transition: opacity 0.6s;
 }
 .rb-arch.is-loaded .rb-arch__credit { opacity: 1; }
+/* eat credit gets filled by JS when the photo loads */
+#eat-credit:empty { display: none; }
 @media (max-width: 700px) {
   .rb-section-head--art { grid-template-columns: 1fr; }
   .rb-arch { display: none; }

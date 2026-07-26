@@ -1,7 +1,97 @@
 /* Peacock Travel — Rabat trip data
    Ratings & facts researched 11 Jun 2026 (sources in /research/rabat-content.md).
    Live stay prices: Booking.com search for Fri 19 → Mon 22 Jun 2026, 2 adults + 2 children. */
-window.RABAT = {
+
+/* ---- stylised geography (mini-map thumbnails + live-map overlays) ---- */
+/* coast & river control points (real coordinates, lightly stylised) */
+var RB_COAST_RABAT = [
+  [33.920, -6.960], [33.938, -6.930], [33.952, -6.912], [33.966, -6.897],
+  [33.980, -6.882], [33.994, -6.870], [34.006, -6.861], [34.016, -6.854],
+  [34.024, -6.847], [34.0295, -6.8408], [34.0322, -6.8378]
+];
+var RB_RIVER_W = [
+  [34.0340, -6.8345], [34.0312, -6.8328], [34.0288, -6.8311], [34.0268, -6.8291],
+  [34.0252, -6.8266], [34.0243, -6.8240], [34.0238, -6.8214], [34.0227, -6.8186],
+  [34.0203, -6.8160], [34.0172, -6.8142], [34.0136, -6.8128], [34.0098, -6.8118],
+  [34.0060, -6.8105], [34.0028, -6.8075], [34.0000, -6.8030], [33.9978, -6.7975],
+  [33.9962, -6.7905], [33.9950, -6.7810], [33.9945, -6.7700], [33.9940, -6.7300]
+];
+var RB_RIVER_E = [
+  [34.0368, -6.8330], [34.0344, -6.8305], [34.0320, -6.8285], [34.0300, -6.8262],
+  [34.0285, -6.8240], [34.0276, -6.8215], [34.0270, -6.8190], [34.0258, -6.8160],
+  [34.0234, -6.8130], [34.0203, -6.8105], [34.0166, -6.8090], [34.0128, -6.8078],
+  [34.0095, -6.8060], [34.0065, -6.8030], [34.0040, -6.7988], [34.0020, -6.7935],
+  [34.0006, -6.7868], [33.9996, -6.7780], [33.9990, -6.7680], [33.9985, -6.7300]
+];
+var RB_COAST_SALE = [
+  [34.0392, -6.8362], [34.0398, -6.8300], [34.0420, -6.8230], [34.0455, -6.8130],
+  [34.0500, -6.8020], [34.0550, -6.7900], [34.0605, -6.7770], [34.0660, -6.7640],
+  [34.0720, -6.7480]
+];
+/* overlays drawn on the live map */
+var RB_MEDINA = [
+  [34.0310, -6.8395], [34.0230, -6.8440], [34.0172, -6.8422],
+  [34.0248, -6.8288], [34.0300, -6.8320], [34.0317, -6.8366]
+];
+var RB_KASBAH = [
+  [34.0338, -6.8366], [34.0322, -6.8388], [34.0303, -6.8374],
+  [34.0307, -6.8352], [34.0323, -6.8344]
+];
+var RB_RAIL = [
+  [34.0160, -6.8367], [34.0110, -6.8430], [34.0030, -6.8490], [33.9920, -6.8570],
+  [33.9760, -6.8700], [33.9580, -6.8860], [33.9380, -6.9060], [33.9180, -6.9280]
+];
+var RB_ROWBOAT = [[34.0284, -6.8306], [34.0306, -6.8270]];
+
+window.TRIP = {
+
+  /* engine config — see docs/architecture.md for the schema */
+  meta: {
+    slug: 'rabat',
+    city: 'Rabat',
+    inPlace: 'we’re in Morocco',
+    curtain: { word: 'الرباط', sub: 'Peacock Travel · Trip № 1' },
+    dep: '2026-06-19T07:55:00+01:00',
+    ret: '2026-06-22T15:05:00+01:00',
+    tz: '+01:00',
+    dayDates: ['2026-06-19', '2026-06-20', '2026-06-21', '2026-06-22'],
+    nights: 3,
+    stayDist: {
+      anchors: [
+        { label: 'Kasbah', lat: 34.0317, lng: -6.8359 },
+        { label: 'Hassan Tower', lat: 34.0226, lng: -6.8208 }
+      ],
+      far: { emoji: '🚕', label: 'by taxi', perKmMin: 3, minMin: 6 },
+      special: [{ re: 'Salé', template: '⛵ rowboat across + {min} min → Kasbah', short: '⛵ {min} min' }]
+    },
+    eatBuckets: [
+      { key: 'old', label: 'Old town', re: 'Medina|Kasbah|river|Bab' },
+      { key: 'centre', label: 'Centre', default: true },
+      { key: 'south', label: 'Agdal &amp; south', re: 'Agdal|Hay Riad|Prestigia' }
+    ]
+  },
+  map: {
+    home: [[33.990, -6.884], [34.058, -6.778]],
+    homePortrait: [[34.000, -6.862], [34.048, -6.798]],
+    maxBounds: [[33.80, -7.15], [34.22, -6.50]],
+    minZoom: 11,
+    inset: { outlineGlobal: 'MA_OUTLINE', dot: [34.02, -6.84] },
+    thumb: {
+      bbox: { latMin: 33.928, latMax: 34.078, lngMin: -6.935, lngMax: -6.736 },
+      refLat: 34.02,
+      lines: [RB_COAST_RABAT, RB_COAST_SALE, RB_RIVER_W, RB_RIVER_E]
+    },
+    geometry: {
+      polygons: [
+        { pts: RB_MEDINA, style: { color: '#c8552c', weight: 1.6, dashArray: '5 4', fillColor: '#c8552c', fillOpacity: 0.08, interactive: false } },
+        { pts: RB_KASBAH, style: { color: '#4a63d8', weight: 1.6, fillColor: '#4a63d8', fillOpacity: 0.1, interactive: false } }
+      ],
+      polylines: [
+        { pts: RB_RAIL, style: { color: '#b8860b', weight: 2.5, dashArray: '10 6', opacity: 0.8 }, tooltip: 'ONCF railway → Casablanca · ~1 h' },
+        { pts: RB_ROWBOAT, curve: false, style: { color: '#2b6f8f', weight: 2, dashArray: '2 6', opacity: 0.9, lineCap: 'round' }, tooltip: 'Blue rowboat crossing · 2.5–5 MAD' }
+      ]
+    }
+  },
 
   /* Hotlinked from Wikimedia Commons; the illustrated hero beneath stands alone if it can't load. */
   heroPhoto: {
@@ -9,6 +99,11 @@ window.RABAT = {
     alt: 'The Bou Regreg river with blue boats below the walls of Rabat’s old city',
     credit: 'Photo: MarwanAndrew, CC BY-SA 4.0, via Wikimedia Commons',
     page: 'https://commons.wikimedia.org/wiki/File:Rabat_City_1.JPG'
+  },
+  eatPhoto: {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Moroccan_TAGINE.JPG/640px-Moroccan_TAGINE.JPG',
+    alt: 'A steaming Moroccan tagine in its conical clay pot',
+    credit: 'Ridouan Red · CC BY-SA 4.0 · Wikimedia'
   },
 
   /* ---------------- points of interest ---------------- */
@@ -68,7 +163,7 @@ window.RABAT = {
       why: 'Easy family evening: promenade, ice cream, boats.' },
 
     /* — tables — */
-    { id: 'huna', type: 'food', name: 'HUNA | Eat & Drink', lat: 33.9590, lng: -6.8660,
+    { id: 'huna', kid: true, type: 'food', name: 'HUNA | Eat & Drink', lat: 33.9590, lng: -6.8660,
       area: 'Hay Riad', rating: { score: 4.8, count: 3000, src: 'Google' }, price: '€€', cuisine: 'Modern Mediterranean · brunch',
       desc: 'The city’s most-reviewed restaurant — stylish all-day sharing plates and serious desserts.',
       why: 'Safe-bet relaxed family lunch on the Hay Riad day.' , bar: 'clear' },
@@ -80,7 +175,7 @@ window.RABAT = {
       area: 'Agdal', rating: { score: 4.8, count: 168, src: 'Google' }, price: '€€', cuisine: 'Mediterranean bistro',
       desc: 'Terrace bistro on Avenue de France — brunch plates and excellent coffee.',
       why: 'Dependable casual lunch; weekend brunch is the move.', bar: 'clear' },
-    { id: 'milena', type: 'food', name: 'Da Milena', lat: 33.9420, lng: -6.8870,
+    { id: 'milena', kid: true, type: 'food', name: 'Da Milena', lat: 33.9420, lng: -6.8870,
       area: 'Prestigia · Hay Riad', rating: { score: 4.7, count: 294, src: 'Restaurant Guru' }, price: '€€', cuisine: 'Italian · wood-fired pizza',
       desc: 'Thin crispy crust, a lasagna locals call one of Morocco’s best, and owners who fuss over kids.',
       why: 'The “kids are tired of tagine” night — book it after the zoo.', bar: 'clear' },
@@ -96,7 +191,7 @@ window.RABAT = {
       area: 'Ville Nouvelle', rating: { score: 4.4, count: 441, src: 'Google' }, price: '€€€', cuisine: 'French · 1930s villa',
       desc: 'Refined French classics in an art-deco villa with garden-patio tables.',
       why: 'Rabat’s classic French table — better as the parents’ pick.', bar: 'near' },
-    { id: 'typotes', type: 'food', name: 'Ty Potes', lat: 34.0163, lng: -6.8330,
+    { id: 'typotes', kid: true, type: 'food', name: 'Ty Potes', lat: 34.0163, lng: -6.8330,
       area: 'Hassan', rating: { score: 4.3, count: 230, src: 'Tripadvisor' }, price: '€€', cuisine: 'Breton crêperie',
       desc: 'Savoury galettes, sweet crêpes and a quiet garden near the Hassan Tower.',
       why: 'Crêpes + garden = the easiest kids’ lunch in the quarter.', bar: 'near' },
@@ -104,15 +199,15 @@ window.RABAT = {
       area: 'Ville Nouvelle', rating: { score: 4.3, count: 1135, src: 'Restaurant Guru' }, price: '€€', cuisine: 'Moroccan · live oud',
       desc: 'Old-school institution since 1994 — tagines and couscous royale with live Andalusian music at dinner.',
       why: 'Dinner-with-music night; go early with the kids.', bar: 'near' },
-    { id: 'darnaji', type: 'food', name: 'Dar Naji', lat: 34.0175, lng: -6.8425,
+    { id: 'darnaji', kid: true, type: 'food', name: 'Dar Naji', lat: 34.0175, lng: -6.8425,
       area: 'Bab El Had · Medina edge', rating: { score: 4.2, count: 5000, src: 'Google' }, price: '€', cuisine: 'Moroccan · Friday couscous',
       desc: 'Cheap, cheerful, theatrical — acrobatic mint-tea pouring and Friday couscous done properly.',
       why: 'The classic first-lunch-in-Morocco. Below our bar, but the tea show earns its place.', bar: 'icon' },
-    { id: 'maure', img: { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Moroccan_Mint_Tea_-_1.jpg/640px-Moroccan_Mint_Tea_-_1.jpg', credit: 'Sarkar Sayantan · CC BY-SA 4.0' }, type: 'food', name: 'Café Maure', lat: 34.0305, lng: -6.8340,
+    { id: 'maure', kid: true, img: { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Moroccan_Mint_Tea_-_1.jpg/640px-Moroccan_Mint_Tea_-_1.jpg', credit: 'Sarkar Sayantan · CC BY-SA 4.0' }, type: 'food', name: 'Café Maure', lat: 34.0305, lng: -6.8340,
       area: 'Kasbah', rating: { score: 4.0, count: 1334, src: 'Restaurant Guru' }, price: '€', cuisine: 'Mint tea · ghriba biscuits',
       desc: 'Mosaic terrace hanging off the Kasbah walls, looking across the river to Salé. Tea, almond ghriba, juice — nothing more.',
       why: 'The most atmospheric tea stop in Morocco’s capital; the rating is tourist-pricing grumbles, not the view.', bar: 'icon' },
-    { id: 'dhow', type: 'food', name: 'Le Dhow', lat: 34.0258, lng: -6.8272,
+    { id: 'dhow', kid: true, type: 'food', name: 'Le Dhow', lat: 34.0258, lng: -6.8272,
       area: 'On the river', rating: { score: 3.8, count: 5966, src: 'Restaurant Guru' }, price: '€€', cuisine: 'Drinks on a moored dhow',
       desc: 'A real wooden dhow moored below the Hassan slope — café deck up top, lounge below.',
       why: 'Drinks-and-ice-cream stop with a knockout view. Reviews agree: don’t stay for dinner.', bar: 'icon' },
