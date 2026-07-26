@@ -5,6 +5,9 @@ global and the newest engine. Budget a session; the research agents run ~10–15
 with the build.
 
 ## 0 · Facts first (never guess)
+0. **Read `docs/family-profile.md`** — the preference library. Its Hard rules + relevant
+   Tastes sections get pasted into every research-agent prompt in step 1; its "Signals
+   to confirm" tells the agents what to probe this trip.
 1. Gmail: search the destination — the Ryanair itinerary is usually forwarded by Annamaria
    (`Fwd: Ryanair Travel Itinerary`). Extract: flight numbers, airports (**check for
    split-airport returns** — Milan was in-MXP/out-BGY), times, booking ref, price, passengers.
@@ -66,3 +69,11 @@ with the build.
 - Send the user screenshots: hero, itinerary, the map's signature flight, tables, stays.
 - Flag loudly anything time-critical found in research (sold-out tickets, reservation
   windows) — those beat design polish in the final message.
+
+## 5 · Learn (after the trip — how the atlas gets smarter)
+- Ask the family what landed and what flopped; append a dated entry to the log in
+  `docs/family-profile.md` (template inside).
+- Promote signals seen twice into the Tastes section; prune anything disproven (leave a
+  dated note, don't silently delete). Check off any "Signals to confirm" the trip answered.
+- Whenever the user reveals a preference mid-conversation — any session, any topic —
+  write it into the profile then and there.

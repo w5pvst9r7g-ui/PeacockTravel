@@ -33,6 +33,9 @@ everything vendored; only map tiles and Wikimedia photos stream at runtime.
 5. **Trip truth lives in two places:** flights/refs in Gmail + the Drive cowork project
    (`trips.md`, folder `1Y2tCzMlbHGqvv19UTCS57T_-Js5P7X1t`); everything the site asserts in
    `assets/data/<trip>-data.js` with receipts in `research/`.
+6. **Recommendations come from `docs/family-profile.md`.** Read it before suggesting
+   anything; paste its Hard rules + Tastes into research-agent prompts; when the family
+   reveals a preference — any session — write it there in the same session.
 
 ## Quick commands
 
