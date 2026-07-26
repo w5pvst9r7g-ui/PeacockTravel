@@ -72,13 +72,26 @@ window.TRIP = {
   pois: [{
     id, type: 'sight'|'food'|'stay'|'transit',
     name, lat, lng, area, desc, why,
-    rating: { score|null, count|null, src|null },  // Booking.com src renders as n/10 badge
+    rating: { score, count|null, src },
+      // score MUST be a number for food & stay — trip.js calls .toFixed(1) unguarded and a
+      //   null throws inside the top-level IIFE, killing every later render on the page.
+      // src is interpolated raw for food & stay — a null prints the literal "null".
+      // score/count/src may be null ONLY for sight & transit (trip-map.js guards those).
+      // src === 'Booking.com' renders the score as an n/10 gold badge instead of stars.
     img:   { src, credit }?,                       // photo banner in map card
     city?: 'Varenna',                              // per-poi Google-Maps city override
+    price,   // REQUIRED on food AND stay (different shapes, below); optional on
+             //   sight/transit, where trip-map.js appends it to the map card's area line.
     // food only:
-    price: '€'|'€€'|'€€€', cuisine, bar: 'clear'|'near'|'icon', kid?: true,
+    cuisine, bar: 'clear'|'near'|'icon', kid?: true,   // ≥1 food poi must set kid (probe asserts it)
+    //   price is exactly '€' | '€€' | '€€€' — '€' is what the "cheap eats" chip matches
     // stay only:
-    style, book (Booking URL with dates+party), pick?: true   // front-runner ribbon
+    style, book (Booking URL with dates+party), pick?: true,  // front-runner ribbon
+    //   price is the TOTAL for the whole stay: '€854 · 3 nights', ranges allowed as
+    //   '≈ €700–840 · 3 nights' (en-dash, optional ≈). perNight() parses the first number
+    //   (and the second for ranges) and divides by meta.nights; the compare table prints
+    //   price.split('·')[0] and sorts on the first number — keep the ' · N nights' suffix
+    //   and the comma thousands separators.
   }],
   days: [{
     n, dow, date, title, color, vibe, alt?,        // alt renders as the ⇄ dashed badge
@@ -105,11 +118,12 @@ beach sunset train moon — filled 24×24 paths in trip.js's ICONS dict (a share
 
 `assets/data/trips-index.js` → `window.TRIPS`: one entry per trip (field list documented in
 the file header). Status upcoming/travelling/travelled is computed from dep/ret at load
-(honours `__TRIP_NOW`). Cards render for entries with `page` (art cloned from
-`<template id="art-<slug>">`, fallback `art-generic`); globe arcs/pins for entries with
-`coords`; the departures board + marquee follow the featured trip (live, else next
+(honours `__TRIP_NOW`). Cards render for entries with `page`; globe arcs/pins for entries
+with `coords`; the departures board + marquee follow the featured trip (live, else next
 upcoming); pageless entries (Maldives, Queensland) keep the board truthful. Camera + plane
 follow the featured *destination* (next upcoming with coords, else most recently returned).
+Card art is cloned from the `<template>` named by the entry's `art` field (convention
+`art-<slug>`); a missing or unknown `art` falls back silently to `art-generic`.
 
 ## Map engine API (trip-map.js)
 

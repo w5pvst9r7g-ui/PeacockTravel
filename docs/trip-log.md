@@ -29,6 +29,15 @@ Last updated: 26 Jul 2026.
   page on request — Southern-Hemisphere summer will stress-test the playbook's
   seasonal assumptions nicely.
 
+## Known debts (not blocking, but the honesty bar notices)
+- **Three Milan stays have prices but no research entry**: Hotel Midway, Milan Retreats
+  Duomo, Heart Milan Apartments Duomo appear in `milan-data.js` with live prices, but
+  `research/milan-content.md` has no row for them — so those figures can't be traced to a
+  source URL as `docs/standards.md` requires. Fix by re-running the Booking.com pass and
+  recording the sources; don't invent them.
+- Post-trip debriefs owed for both trips (see above) — the first real exercise of the
+  `docs/family-profile.md` learning loop.
+
 ## Standing conventions
 - Kids' ages for pricing searches: **8 and 10 (assumption — never confirmed)**; also
   tracked in `docs/family-profile.md` → Signals to confirm.

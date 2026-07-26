@@ -49,13 +49,23 @@ research agents run ~10–15 min in parallel with the build.
      `assets/data/<country>-outline.js`).
    - Stub a few pois/days first so the shell smoke-tests; swap in researched content
      when the agents land.
-2. `<trip>.html` — copy milan.html; swap the bespoke parts only: og: meta (og:image =
-   hero photo 1280), hero scene SVG (sky gradient + 2–3 silhouette layers in the city's
-   palette), title letters (one italic-gold), chips, brief lede + 4 facts, day-tab labels
-   (one per day), extra-section card, footer word. Script tags already point at the
-   shared engine (outline → data → trip-map.js → trip.js) — copy them as-is.
+2. `<trip>.html` — copy milan.html; swap the bespoke parts: `<title>` and
+   `<meta name="description">`, og: meta (og:image = hero photo 1280), the accent
+   stylesheet `<link>` (→ `assets/css/<trip>.css`; delete the line if the trip needs no
+   accents, as rabat.html does), hero scene SVG (sky gradient + 2–3 silhouette layers in
+   the city's palette), title letters (one italic-gold), chips, brief lede + 4 facts,
+   day-tab labels (one per day), extra-section card, footer word.
+   **Of the four script tags only the last two copy as-is** (`trip-map.js` → `trip.js`,
+   the shared engine) — repoint the first two at `assets/data/<country>-outline.js` and
+   `assets/data/<trip>-data.js`. Load order stays outline → data → trip-map.js → trip.js.
+   The outline file's global (`window.<XX>_OUTLINE`) must match
+   `TRIP.map.inset.outlineGlobal` or the inset silently draws nothing. Copying Milan's
+   script tags unchanged 404s nothing and looks fine — it just renders Milan's trip.
 3. `assets/css/<trip>.css` — hero bg + photo tint + footer stripe only (see milan.css).
    Everything else is trip.css (shared). Body class: `trip-page <slug>`.
+   Note: Rabat's accents ARE the defaults inside trip.css, which is why rabat.html ships
+   no accent file — a new trip always needs one (the Milan pattern), or it inherits
+   Rabat's palette.
 4. Landing — exactly two touches: one registry entry in `assets/data/trips-index.js`
    (the file header documents every field) + one `<template id="art-<slug>">` card scene
    in index.html. Cards, globe arc + pin, board, marquee and footer links all follow.
@@ -71,6 +81,11 @@ research agents run ~10–15 min in parallel with the build.
   layout; a dead URL to see the fallback.
 - Engine rule: if you touched trip.js / trip-map.js / trip.css at all, shoot + probe
   **both existing pages** too.
+- Probe preconditions live in the DATA file, not the engine — miss one and probe.mjs
+  exits 1 on a perfectly healthy page: ≥2 days plus a `data-day="2"` tab in the shell,
+  >10 pois, and **at least one `type:'food'` poi flagged `kid: true`**.
+  `meta.dayDates[1]` must be the real day-2 date — the mid-trip simulation loads noon on
+  it and asserts day 2 reads as "today".
 
 ## 4 · Ship & close the loop
 - Commit (message = what a reader needs, session link footer), push → auto-deploy;

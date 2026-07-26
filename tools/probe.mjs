@@ -1,5 +1,6 @@
 /* Interaction probe for a trip page — assertion-based, engine-agnostic.
-   Usage (from repo root or tools/):  node tools/probe.mjs <page.html> [out-prefix]
+   Usage (from the repo root):  node tools/probe.mjs <page.html> [out-prefix]
+   (from tools/ drop the "tools/" prefix — paths resolve from lib/harness.mjs either way)
 
    Works before AND after engine unification: it finds the engine via
    window.TripMap || window.MilanMap || window.RabatMap and the data via

@@ -27,7 +27,8 @@ Moving the repo? `docs/MIGRATION.md` is the checklist; `tools/set-site-url.mjs` 
 1. **Verify before push.** Every change runs through the harness from repo root:
    `node tools/shoot.mjs <page> <prefix>` (desktop+mobile, console, overflow) and, for
    trip-page or engine changes, `node tools/probe.mjs <page>` (~34 interaction checks).
-   Both exit 0 = green. Sandbox cert noise (wikimedia/cartocdn) is filtered automatically.
+   Both exit 0 = green. Sandbox proxy noise (wikimedia/cartocdn, blocked at the transport
+   layer) is filtered automatically; a 404 on a local asset is never filtered and fails.
 2. **Honesty bar.** Family standard is 4.5★ Google with real review volume. Never round up,
    never invent; below-bar picks are shown with flags (`bar: 'near' | 'icon'`), and every
    figure traces to a source URL in `research/*.md`.

@@ -96,6 +96,6 @@ window.TRIPS = [
     boardDetail: 'Three weeks of Australian summer',
     shortWhen: 'Christmas',
     marquee: ['Queensland', 'Christmas in summer', 'Reef days', 'Window seats only'],
-    manifest: 'Christmas at home'
+    manifest: 'three weeks, Christmas in summer'
   }
 ];

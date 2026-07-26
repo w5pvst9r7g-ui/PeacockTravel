@@ -74,10 +74,14 @@ export function shotPath(name) {
   return join(SHOTS_DIR, name);
 }
 
-/* Sandbox noise: the egress proxy MITMs unknown hosts, so wikimedia/cartocdn
-   requests fail with cert errors. Real failures are everything else. */
+/* Sandbox noise: the egress proxy MITMs unknown hosts, so wikimedia/cartocdn requests
+   fail at the TRANSPORT layer (net::ERR_CERT_*, net::ERR_CONNECTION_RESET).
+   Anything that came back with an HTTP status was served locally — that is a real
+   failure (a 404 on a local image/CSS url()), never noise. Don't widen this to a bare
+   /Failed to load resource/, which is what let broken local assets report CLEAN. */
 export function isSandboxNoise(msg) {
-  return /ERR_CERT|cartocdn|wikimedia|Failed to load resource/.test(msg);
+  if (/the server responded with a status of/.test(msg)) return false;
+  return /ERR_CERT|ERR_CONNECTION_RESET|cartocdn|wikimedia|Failed to load resource: net::/.test(msg);
 }
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));

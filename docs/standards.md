@@ -4,6 +4,9 @@
 - Target: **Google 4.5★+ with a healthy review count**. State score + ~count + source next
   to every venue; `~` marks estimates. Where Google isn't verifiable, use a labelled
   alternative (Tripadvisor, Restaurant Guru, TheFork, Booking) — never present it as Google.
+  For **food and stay** picks the alternative's *numeric* score still goes in `score` (the
+  engine renders it unguarded — a null crashes the page); name the true provenance in `src`.
+  Shipped pattern: milan-data.js's `src: 'Google-mirror · TA 4.1'`.
 - Below-bar places are not hidden — they're grouped and flagged:
   `bar: 'clear'` (≥4.5) · `'near'` (4.3–4.4, "just under") · `'icon'` ("vibes pick", we say
   exactly why we'd still go: Café Maure's view, Luini's queue, Ratanà's critics).
@@ -17,7 +20,9 @@
 - Stays quote **live Booking.com totals for the exact dates and party** (2 adults +
   2 children, assumed ages 8/10 — assumption is documented, keep it consistent), with
   per-night maths derived in-page. `book` links carry dates+party so one tap re-checks.
-- Say the structural truth prices reveal (Milan: hotels €2.9–3.7k vs apartments €0.7–1.5k).
+- Say the structural truth prices reveal — but quote the shipped set, not a remembered
+  band (Milan: everything liveable — 3★ hotels, hostel family rooms, apartments and
+  aparthotels — landed €0.7–1.9k for 3 nights, against a single €3.7k design-4★ address).
 
 ## Image licensing (non-negotiable)
 - Wikimedia Commons only. Ship **VERIFIED licenses only**: PD/CC0/CC BY/CC BY-SA, with

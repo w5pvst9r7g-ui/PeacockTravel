@@ -48,9 +48,9 @@ Grotesk) and geo data are vendored under `assets/`. At runtime the pages stream 
 kinds of external content: CARTO/OSM map tiles and Wikimedia Commons photography — both
 degrade gracefully (designed fallback tiles; illustrated heroes that stand alone).
 
-Dev tools (screenshot/interaction harness): `cd tools && npm i`, then
-`node tools/shoot.mjs <page> <prefix>` and `node tools/probe.mjs <page>` —
-see `docs/operations.md`.
+Dev tools (screenshot/interaction harness): `cd tools && npm i` once, then **from the
+repo root**: `node tools/shoot.mjs <page>.html <prefix>` and
+`node tools/probe.mjs <page>.html` — see `docs/operations.md`.
 
 ## Structure
 

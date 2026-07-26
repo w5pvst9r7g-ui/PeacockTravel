@@ -104,8 +104,10 @@ Drive).
 ### Milan — 9–12 Jul 2026 · logged 26 Jul 2026 (from the plan as shipped)
 - Planned around: Duomo rooftop 09:00 slot, Lake Como Saturday with a swim anchor,
   Bergamo Città Alta finale with hard down-rule, Navigli dinner.
-- Structural price truth: hotels €2.9–3.7k vs apartments €0.7–1.5k for the same dates —
-  drove the shortlist; Ostello Bello Centrale front-ran on the 00:30 arrival (24h desk).
+- Structural price truth: the whole workable shortlist sat €0.7–1.9k for 3 nights (Hotel
+  Midway €722 up to 21HoS Navigli €1,872) against one €3.7k design-4★ splurge (Room Mate
+  Giulia) — drove the shortlist; Ostello Bello Centrale front-ran on the 00:30 arrival
+  (24h desk). Note: cheap did NOT mean apartment-only — the cheapest option was a hotel.
 - Reservation-window lesson: Last Supper weekly drops + Trippa's 1-month window —
   **research must surface booking-window alarms early**, they beat design polish.
 - **Post-trip debrief not yet captured** — ask and append.

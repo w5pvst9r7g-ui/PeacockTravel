@@ -1,5 +1,11 @@
 /* ============================================================
-   Peacock Travel — Rabat trip page
+   Peacock Travel — shared trip-page stylesheet (ALL trip pages)
+   The `rb-*` class prefix is historical (Rabat was the first page); the classes
+   are shared names now. Rabat's own accents are the DEFAULTS in here (e.g. the
+   .rb-hero background), which is why rabat.html's body is just `trip-page` with
+   no accent stylesheet, while milan.html uses `trip-page milan` +
+   assets/css/milan.css to override them. New trips follow the Milan pattern —
+   see docs/playbook-new-trip.md step 2.
    ============================================================ */
 
 .trip-page { background: var(--cream); }

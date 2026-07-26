@@ -1,5 +1,6 @@
 /* Rewrite the site's base URL everywhere it is hardcoded — for repo moves.
-   Usage (from repo root or tools/):
+   Usage (from the repo root; from tools/ drop the "tools/" prefix — paths resolve
+   from this file either way):
      node tools/set-site-url.mjs --dry-run                 # show current base + hits
      node tools/set-site-url.mjs https://user.github.io/Repo/
    Self-locating: reads the CURRENT base from index.html's og:url, then exact-string
@@ -32,7 +33,8 @@ if (dry) {
       if (line.includes(current)) console.log(`  ${f}:${i + 1}  ${line.trim()}`);
     });
   }
-  console.log('\nRun with the new base URL to rewrite, e.g.\n  node tools/set-site-url.mjs https://<user>.github.io/<Repo>/');
+  console.log('\nRun with the new base URL to rewrite, e.g.\n  node tools/set-site-url.mjs https://<user>.github.io/<Repo>/'
+    + '\n  (from the repo root; from tools/ drop the "tools/" prefix)');
   process.exit(0);
 }
 

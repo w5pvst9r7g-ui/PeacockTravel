@@ -1,5 +1,6 @@
 /* Screenshot + console-error harness.
-   Usage (from repo root or tools/):  node tools/shoot.mjs <page.html> <out-prefix>
+   Usage (from the repo root):  node tools/shoot.mjs <page.html> <out-prefix>
+   (from tools/ drop the "tools/" prefix — paths resolve from lib/harness.mjs either way)
    Captures hero + fullPage at 1440px and 390px into tools/shots/, reports console
    errors / pageerrors / failed requests / horizontal overflow. Sandbox cert noise
    (wikimedia, cartocdn) is listed separately and doesn't count as a failure. */

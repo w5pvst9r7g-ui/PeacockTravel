@@ -2,8 +2,10 @@
 
 ## Verification harness (tools/ — self-contained, runs on any machine)
 
-Setup once per machine: `cd tools && npm i` (with a system Chrome installed,
-`npm i --omit=optional` skips the fallback-Chromium download). Browser resolution:
+Setup once per machine: `(cd tools && npm i)` (with a system Chrome installed,
+`npm i --omit=optional` skips the fallback-Chromium download). **All harness commands
+below run from the repo root** — note the subshell parens above, or `cd` back first.
+Browser resolution:
 `$PEACOCK_CHROME` → common system paths (incl. this sandbox's `/opt/pw-browsers`) →
 `@sparticuz/chromium`. All output lands in `tools/shots/` (gitignored).
 
@@ -19,9 +21,11 @@ Setup once per machine: `cd tools && npm i` (with a system Chrome installed,
   (docs/MIGRATION.md).
 - `node tools/gen-dots.mjs` — regenerates the globe land grid (world-atlas → JSON;
   hand-wrap into assets/data/land-dots.js).
-- **Expected failures in the sandbox:** `ERR_CERT_AUTHORITY_INVALID` / reqfail for
-  `upload.wikimedia.org` and `*.cartocdn.com` — the egress proxy MITMs unknown hosts.
-  The tools filter these automatically; anything they still report is real.
+- **Expected failures in the sandbox:** `net::ERR_CONNECTION_RESET` (older sessions:
+  `ERR_CERT_AUTHORITY_INVALID`) for `upload.wikimedia.org` and `*.cartocdn.com` — the
+  egress proxy blocks unknown hosts. The tools filter these transport-layer failures
+  automatically; anything they still report is real. In particular a **404 is never
+  filtered** — a broken local asset fails the run, which is the point.
 - Judge results programmatically when eyes disagree: `document.elementFromPoint`,
   ray-cast geometry checks, DOM state via `page.evaluate` — twice this caught "bugs"
   that were actually misread screenshots, and once the reverse.
@@ -41,8 +45,10 @@ Setup once per machine: `cd tools && npm i` (with a system Chrome installed,
 
 **This remote sandbox:** egress proxy allows npm/git/MCP only (browsers/curl to the open
 web fail by design); headless Chromium pre-installed at `/opt/pw-browsers/chromium` (the
-harness finds it); foreground `sleep` blocked — use `Bash run_in_background: sleep N` +
-`TaskOutput`. The container is ephemeral: after a recycle, re-run `cd tools && npm i`.
+harness finds it); foreground `sleep` is blocked — background the wait instead
+(`run_in_background` with a command that exits when the condition is true, e.g.
+`until <cond>; do sleep 0.5; done` — it notifies you on exit).
+The container is ephemeral: after a recycle, re-run `(cd tools && npm i)`.
 
 **A normal machine:** `cd tools && npm i --omit=optional` and everything runs; no proxy
 filters needed (wikimedia/cartocdn will actually load, so screenshots show real photos
