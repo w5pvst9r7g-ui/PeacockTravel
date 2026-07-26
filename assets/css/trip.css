@@ -2,7 +2,7 @@
    Peacock Travel — Rabat trip page
    ============================================================ */
 
-.rabat { background: var(--cream); }
+.trip-page { background: var(--cream); }
 
 /* shared section heads */
 .rb-section-head { padding: clamp(70px, 10vw, 120px) var(--gutter) clamp(30px, 4vw, 50px); max-width: 980px; }
@@ -1042,7 +1042,7 @@ section[id] { scroll-margin-top: 64px; }
 }
 
 /* footer — zellige stripe */
-.rabat .footer { border-top: 6px solid; border-image: repeating-linear-gradient(90deg, #d9a441 0 28px, #0e7c66 28px 56px, #c8552c 56px 84px, #2b4bd8 84px 112px) 6; }
+.trip-page .footer { border-top: 6px solid; border-image: repeating-linear-gradient(90deg, #d9a441 0 28px, #0e7c66 28px 56px, #c8552c 56px 84px, #2b4bd8 84px 112px) 6; }
 
 /* trip-time awareness */
 .rb-day__tag {
@@ -1084,7 +1084,7 @@ section[id] { scroll-margin-top: 64px; }
 
 @media print {
   * { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
-  body, body.rabat { background: #fff; color: #000; }
+  body, body.trip-page { background: #fff; color: #000; }
   .nav, .rb-hero__scene, .rb-hero__scroll, .rb-hero__credit, .rb-curtain,
   .rb-map, .rb-divider, .rb-hoods, .rb-extra__art, .rb-arch,
   .rb-stop__btns, .rb-row__actions, .rb-stay-card__actions, .rb-eat__chips,
